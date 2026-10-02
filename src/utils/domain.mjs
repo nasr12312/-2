@@ -1,5 +1,5 @@
 export const levels=['متفوق','متقدم','متمكن','غير مجتاز','إعادة التقييم'];
-export const roleNames={teacher:'معلم',supervisor:'مشرف تربوي',parent:'ولي أمر',admin:'مدير النظام',principal:'مدير المدرسة',student:'طالب'};
+export const roleNames={teacher:'معلم',supervisor:'مشرف تربوي',parent:'ولي أمر',admin:'مدير المنصة',principal:'مدير المدرسة',student:'طالب'};
 export const evaluationKey=(student,week,day,track='الحفظ')=>`${student}-${week}-${day}-${track}`;
 export function visibleStudents(user,students){if(['admin','principal','supervisor'].includes(user.role))return students;if(user.role==='teacher')return students.filter(s=>user.classIds.includes(s.classId));return students.filter(s=>user.studentIds.includes(s.id));}
 export function dailyRange(from,to,day,days=5){if(!from)return 'مراجعة وتثبيت';const length=to-from+1;const start=from+Math.floor(length*day/days);const end=from+Math.floor(length*(day+1)/days)-1;return `${start}–${end}`;}
