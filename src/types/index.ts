@@ -5,7 +5,7 @@ export interface Student {id:number;remoteId?:string;name:string;classId:number;
 export interface Classroom {id:number;remoteId?:string;name:string;teacher:string;teacherId:string;program?:string;stage?:string;grade?:string}
 export interface SchoolPlanEntry {id:string;program:string;stage:string;grade:string;week:number;day:string;track:string;text:string}
 export interface QuranWeek {id:number;memorization:string;memFrom:number;memTo:number;recitation:string;recFrom:number;recTo:number;holiday?:string}
-export interface QuranEvaluation {studentId:number;weekId:number;day:number;track:string;grade:string;scores:number[];self:number[];review:number[];notes:string;teacherId:string;createdAt:string}
+export interface QuranEvaluation {planEntryId?:string;studentId:number;weekId:number;day:number;track:string;grade:string;scores:number[];self:number[];review:number[];notes:string;teacherId:string;createdAt:string}
 export interface RecitationSubmission {id:string;studentId:number;weekId:number;track:string;surah:string;fromAyah:number;toAyah:number;fileName:string;mimeType:string;size:number;submittedAt:string;submittedBy:string;status:'pending'|'reviewed';grade?:string;teacherNotes?:string;evaluatedAt?:string;evaluatedBy?:string}
 export interface ParentSignature {studentId:number;weekId:number;parentId:string;parentName:string;signedAt:string}
 export interface Attendance {studentId:number;date:string;status:string;note:string}

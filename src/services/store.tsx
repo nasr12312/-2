@@ -7,7 +7,7 @@ import type {Database,User,Permission,Student,RecitationSubmission} from '../typ
 const KEY='gheras-database-v1';
 export const uid=()=>crypto.randomUUID();
 export const dateText=(v:string)=>new Date(v).toLocaleString('ar-SA',{calendar:'gregory',dateStyle:'medium',timeStyle:'short'});
-interface AppState {db:Database;user:User|null;students:Student[];page:string;navigate:(s:string)=>void;studentId:number;selectStudent:(id:number)=>void;classId:number;setClassId:(id:number)=>void;can:(p:Permission)=>boolean;mutate:(action:string,fn:(d:Database)=>void,p?:Permission,studentId?:number)=>boolean;submitRecitation:(file:File,input:Pick<RecitationSubmission,'weekId'|'track'|'surah'|'fromAyah'|'toAyah'>,targetStudentId?:number)=>Promise<boolean>;notify:(s:string)=>void;login:(code:string,remember:boolean)=>Promise<boolean>;logout:()=>Promise<void>;toast:string;error:string;authLoading:boolean;remoteEnabled:boolean;setupNeeded:boolean;completeTeacherSetup:(classIds:string[])=>Promise<boolean>}
+interface AppState {refresh:()=>Promise<void>;db:Database;user:User|null;students:Student[];page:string;navigate:(s:string)=>void;studentId:number;selectStudent:(id:number)=>void;classId:number;setClassId:(id:number)=>void;can:(p:Permission)=>boolean;mutate:(action:string,fn:(d:Database)=>void,p?:Permission,studentId?:number)=>boolean;submitRecitation:(file:File,input:Pick<RecitationSubmission,'weekId'|'track'|'surah'|'fromAyah'|'toAyah'>,targetStudentId?:number)=>Promise<boolean>;notify:(s:string)=>void;login:(code:string,remember:boolean)=>Promise<boolean>;logout:()=>Promise<void>;toast:string;error:string;authLoading:boolean;remoteEnabled:boolean;setupNeeded:boolean;completeTeacherSetup:(classIds:string[])=>Promise<boolean>}
 const Context=createContext<AppState>(null!);
 export function AppProvider({children}:{children:React.ReactNode}){
  const [error,setError]=useState('');
@@ -20,7 +20,7 @@ export function AppProvider({children}:{children:React.ReactNode}){
  const [studentId,selectStudent]=useState(1);
  const [classId,updateClass]=useState(()=>Number(localStorage.getItem('gheras-class')||1));
  const [toast,setToast]=useState('');
- const notify=(s:string)=>setToast(s);
+ const notify=(s:string)=>setToast(s);const refresh=async()=>{if(!remoteEnabled)return;const result=await loadRemoteDatabase();setDb(result.db);setUserId(result.userId);setSetupNeeded(result.setupNeeded)};
  useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),3500);return()=>clearTimeout(t)},[toast]);
  useEffect(()=>{if(remoteEnabled){loadRemoteDatabase().then(result=>{setDb(result.db);setUserId(result.userId);setSetupNeeded(result.setupNeeded)}).catch(()=>{}).finally(()=>setAuthLoading(false));return;}try{if(!localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(db));}catch{setError('تعذر حفظ البيانات محليًا. تحقق من المساحة وإعدادات المتصفح.')}},[]);
  const students:Student[]=user?visibleStudents(user,db.students):[];
@@ -44,7 +44,7 @@ export function AppProvider({children}:{children:React.ReactNode}){
  const logout=async()=>{if(remoteEnabled)await signOutRemote();setUserId('');sessionStorage.removeItem('gheras-user');localStorage.removeItem('gheras-user');setPage('dashboard');setSetupNeeded(false)};
  const completeTeacherSetup=async(classIds:string[])=>{if(!classIds.length){notify('اختر شعبة واحدة على الأقل.');return false;}try{await saveTeacherClasses(classIds);const result=await loadRemoteDatabase();setDb(result.db);setUserId(result.userId);setSetupNeeded(false);notify('تم حفظ الشعب وتحميل الطلاب.');return true}catch{notify('تعذر حفظ الشعب. أعد المحاولة.');return false;}};
  const setClassId=(id:number)=>{updateClass(id);localStorage.setItem('gheras-class',String(id))};
- return <Context.Provider value={{db,user,students,page,navigate,studentId,selectStudent,classId,setClassId,can,mutate,submitRecitation,notify,login,logout,toast,error,authLoading,remoteEnabled,setupNeeded,completeTeacherSetup}}>{children}{toast&&<div className="toast" role="status">{toast}</div>}{error&&<div className="storage-error" role="alert">{error}<button onClick={()=>location.reload()}>إعادة المحاولة</button></div>}</Context.Provider>
+ return <Context.Provider value={{refresh,db,user,students,page,navigate,studentId,selectStudent,classId,setClassId,can,mutate,submitRecitation,notify,login,logout,toast,error,authLoading,remoteEnabled,setupNeeded,completeTeacherSetup}}>{children}{toast&&<div className="toast" role="status">{toast}</div>}{error&&<div className="storage-error" role="alert">{error}<button onClick={()=>location.reload()}>إعادة المحاولة</button></div>}</Context.Provider>
 }
 export const useApp=()=>useContext(Context);
 
