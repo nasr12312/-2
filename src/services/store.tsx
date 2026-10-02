@@ -25,7 +25,7 @@ export function AppProvider({children}:{children:React.ReactNode}){
  useEffect(()=>{if(remoteEnabled){loadRemoteDatabase().then(result=>{setDb(result.db);setUserId(result.userId);setSetupNeeded(result.setupNeeded)}).catch(()=>{}).finally(()=>setAuthLoading(false));return;}try{if(!localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(db));}catch{setError('تعذر حفظ البيانات محليًا. تحقق من المساحة وإعدادات المتصفح.')}},[]);
  const students:Student[]=user?visibleStudents(user,db.students):[];
  useEffect(()=>{if(students.length&&!students.some(s=>s.id===studentId))selectStudent(students[0].id)},[userId]);
- const can=(p:Permission)=>!!user&&user.role!=='parent'&&db.permissions[user.role].includes(p);
+ const can=(p:Permission)=>(!remoteEnabled||p!=='editStudents')&&!!user&&user.role!=='parent'&&db.permissions[user.role].includes(p);
  const mutate=(action:string,fn:(d:Database)=>void,p?:Permission,target?:number)=>{
   if(remoteEnabled&&p!=='evaluation'){notify('هذا الإجراء غير متاح في النسخة المتصلة.');return false;}if(user?.role==='parent'){notify('حساب ولي الأمر مخصص للمشاهدة فقط.');return false;}
   if(!user||(p&&!can(p))||(target!==undefined&&!students.some(s=>s.id===target))){notify('ليست لديك صلاحية تنفيذ هذا الإجراء.');return false;}
