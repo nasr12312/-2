@@ -12,6 +12,12 @@ export function entriesForClass(entries:SchoolPlanEntry[],classroom?:Classroom){
  return entries.filter(entry=>entry.program===classroom.program&&normalized(entry.stage).includes(middle?'متوسط':'ابتدا')&&normalized(entry.grade).includes(grade));
 }
 
+export function SchoolRoster(){
+ const {db,students}=useApp();const [search,setSearch]=useState('');const [program,setProgram]=useState('');const [classId,setClassId]=useState(0);
+ const rows=students.filter(s=>(!program||s.program===program)&&(!classId||s.classId===classId)&&(s.name.includes(search)||s.academicId.includes(search)));
+ return <><PageTitle title="قائمة الطلاب" subtitle="بيانات الاسم والرقم الوطني والصف والشعبة من ملفات المدرسة"/><Panel><div className="toolbar"><Field label="البحث"><input value={search} onChange={e=>setSearch(e.target.value)} placeholder="الاسم أو الرقم الوطني"/></Field><Field label="البرنامج"><select value={program} onChange={e=>{setProgram(e.target.value);setClassId(0)}}><option value="">كل البرامج</option><option value="diploma">الدبلومة</option><option value="bilingual">ثنائي اللغة</option></select></Field><Field label="الصف والشعبة"><select value={classId} onChange={e=>setClassId(Number(e.target.value))}><option value={0}>كل الصفوف</option>{db.classes.filter(c=>(!program||c.program===program)&&students.some(s=>s.classId===c.id)).map(c=><option key={c.id} value={c.id}>{c.name}</option>)}</select></Field></div><p>{rows.length} سجل قيد • {new Set(rows.map(s=>s.academicId)).size} طالبًا</p><div className="table-scroll"><table><thead><tr><th>الاسم</th><th>الرقم الوطني</th><th>البرنامج</th><th>الصف</th><th>الشعبة</th></tr></thead><tbody>{rows.map(s=>{const c=db.classes.find(c=>c.id===s.classId);return <tr key={s.id}><td>{s.name}</td><td>{s.academicId}</td><td>{s.program==='diploma'?'الدبلومة':'ثنائي اللغة'}</td><td>{c?.stage} • {c?.grade}</td><td>{c?.name.split(' - ').at(-1)==='غير موزع'?'بانتظار توزيع الشعبة':c?.name.split(' - ').at(-1)}</td></tr>})}</tbody></table></div></Panel></>;
+}
+
 export default function SchoolQuran(){
  const {db,user,students,notify,navigate}=useApp();
  const [extraPlans,setExtraPlans]=useState<SchoolPlanEntry[]>([]);const [newAssignment,setNewAssignment]=useState('');

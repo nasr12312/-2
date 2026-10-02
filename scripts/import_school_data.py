@@ -149,7 +149,9 @@ def read_bilingual() -> tuple[list[dict], dict[str, dict]]:
             seen.add(dedupe_key)
             stage = clean(row[stage_i]) if stage_i is not None and stage_i < len(row) else ""
             grade = clean(row[grade_i]) if grade_i is not None and grade_i < len(row) else clean(sheet.title)
-            section = clean(row[section_i]) if section_i is not None and section_i < len(row) else "أ"
+            section = clean(row[section_i]) if section_i is not None and section_i < len(row) else "غير موزع"
+            if section == "قائمة المسجلين الجدد":
+                section = "غير موزع"
             klass = class_record("ثنائي اللغة", stage, grade, section)
             classes[klass["id"]] = klass
             students.append({
@@ -226,9 +228,26 @@ def main() -> None:
     OUTPUT.mkdir(parents=True, exist_ok=True)
     diploma_students, diploma_classes = read_diploma()
     bilingual_students, bilingual_classes = read_bilingual()
+    # Match the same child across programs only by exact name, stage and grade.
+    for student in diploma_students:
+        classroom = diploma_classes[student['class_id']]
+        matches = [s for s in bilingual_students if s['name'] == student['name']
+                   and bilingual_classes[s['class_id']]['stage'] == classroom['stage']
+                   and bilingual_classes[s['class_id']]['grade'] == classroom['grade']]
+        if len(matches) == 1:
+            student['national_id'] = matches[0]['national_id']
+            student['account_status'] = 'active'
+            section = 'غير موزع'
+        else:
+            section = 'غير موزع'
+        klass = class_record('دبلومة', classroom['stage'], classroom['grade'], section)
+        diploma_classes[klass['id']] = klass
+        student['class_id'] = klass['id']
+    diploma_classes = {k:v for k,v in diploma_classes.items() if any(s['class_id']==k for s in diploma_students)}
     students = diploma_students + bilingual_students
     classes = {**diploma_classes, **bilingual_classes}
     plans = read_plan_forms()
+    plans += [{**entry, 'id': 'shared_' + entry['id'], 'program': 'ثنائي اللغة'} for entry in list(plans)]
 
     codes_path = OUTPUT / 'teacher-access.json'
     teacher_codes = json.loads(codes_path.read_text(encoding='utf-8')) if codes_path.exists() else {}
@@ -266,6 +285,9 @@ def main() -> None:
     ids = [s["national_id"] for s in bilingual_students if s["national_id"]]
     summary = {
         "student_count": len(students),
+        "unique_student_count": len({s['national_id'] for s in students if s['national_id']}),
+        "numbered_class_count": sum(x['section'].isdigit() for x in classes.values()),
+        "pending_distribution_groups": sum(x['section']=='غير موزع' for x in classes.values()),
         "diploma_student_count": len(diploma_students),
         "bilingual_student_count": len(bilingual_students),
         "active_parent_accounts": len(ids),

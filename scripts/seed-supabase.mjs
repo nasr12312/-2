@@ -95,7 +95,6 @@ for (const teacher of source.teachers) {
     full_name: teacher.name,
     role: teacher.role,
     access_code: teacher.access_code,
-    setup_complete: false,
   }]);
 }
 
@@ -114,7 +113,7 @@ for (const student of source.students.filter((item) => item.national_id)) {
 console.log(JSON.stringify({
   status: 'ok',
   students: source.students.length,
-  activeFamilyAccounts: source.students.filter((item) => item.national_id).length,
+  activeFamilyAccounts: new Set(source.students.filter((item) => item.national_id).map(item=>item.national_id)).size,
   teachers: source.teachers.length,
   classes: source.classes.length,
   quranPlanEntries: source.quran_plan_entries.length,
