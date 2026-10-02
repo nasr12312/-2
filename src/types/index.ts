@@ -5,7 +5,7 @@ export interface Student {id:number;remoteId?:string;name:string;classId:number;
 export interface Classroom {id:number;remoteId?:string;name:string;teacher:string;teacherId:string;program?:string;stage?:string;grade?:string}
 export interface SchoolPlanEntry {id:string;program:string;stage:string;grade:string;week:number;day:string;track:string;text:string}
 export interface QuranWeek {id:number;memorization:string;memFrom:number;memTo:number;recitation:string;recFrom:number;recTo:number;holiday?:string}
-export interface QuranEvaluation {planEntryId?:string;studentId:number;weekId:number;day:number;track:string;grade:string;scores:number[];self:number[];review:number[];notes:string;teacherId:string;createdAt:string}
+export interface QuranEvaluation {id?:string;teacherName?:string;writtenFeedback?:string;encouragement?:string;nextStep?:string;planEntryId?:string;studentId:number;weekId:number;day:number;track:string;grade:string;scores:number[];self:number[];review:number[];notes:string;teacherId:string;createdAt:string}
 export interface RecitationSubmission {id:string;studentId:number;weekId:number;track:string;surah:string;fromAyah:number;toAyah:number;fileName:string;mimeType:string;size:number;submittedAt:string;submittedBy:string;status:'pending'|'reviewed';grade?:string;teacherNotes?:string;evaluatedAt?:string;evaluatedBy?:string}
 export interface ParentSignature {studentId:number;weekId:number;parentId:string;parentName:string;signedAt:string}
 export interface Attendance {studentId:number;date:string;status:string;note:string}
@@ -21,5 +21,8 @@ export interface SchoolEvent {id:string;title:string;date:string;type:string;cla
 export interface SupervisorNote {id:string;teacherId:string;type:string;body:string;date:string}
 export interface AuditLog {id:string;actor:string;action:string;date:string}
 export interface StudentNote {id:string;studentId:number;body:string;date:string;author:string}
-export interface Settings {school:string;term:string;year:string;theme:string;mode:string;density:string;fontSize:number;notifications:boolean;logo:string}
-export interface Database {schoolPlans?:SchoolPlanEntry[];version:number;users:User[];students:Student[];classes:Classroom[];evaluations:Record<string,QuranEvaluation>;recitations:RecitationSubmission[];signatures:Record<string,ParentSignature>;attendance:Record<string,Attendance>;messages:Message[];notifications:Notification[];rewards:Reward[];homework:Homework[];quizzes:Quiz[];quizResults:QuizResult[];reports:Report[];events:SchoolEvent[];supervisorNotes:SupervisorNote[];notes:StudentNote[];audit:AuditLog[];permissions:Record<Role,Permission[]>;settings:Settings}
+export interface Settings {termStartDate?:string;school:string;term:string;year:string;theme:string;mode:string;density:string;fontSize:number;notifications:boolean;logo:string}
+export interface EvaluationFollowup {evaluation_id:string;parent_id:string;evaluation_version:string;followed_at:string}
+export interface QuranHomework {id:string;teacher_id:string;class_id:string;student_id:string|null;kind:string;title:string;instructions:string;due_date:string;created_at:string}
+export interface HomeworkFollowup {homework_id:string;student_id:string;parent_id:string;followed_at:string}
+export interface Database {evaluationFollowups?:EvaluationFollowup[];quranHomework?:QuranHomework[];homeworkFollowups?:HomeworkFollowup[];schoolPlans?:SchoolPlanEntry[];version:number;users:User[];students:Student[];classes:Classroom[];evaluations:Record<string,QuranEvaluation>;recitations:RecitationSubmission[];signatures:Record<string,ParentSignature>;attendance:Record<string,Attendance>;messages:Message[];notifications:Notification[];rewards:Reward[];homework:Homework[];quizzes:Quiz[];quizResults:QuizResult[];reports:Report[];events:SchoolEvent[];supervisorNotes:SupervisorNote[];notes:StudentNote[];audit:AuditLog[];permissions:Record<Role,Permission[]>;settings:Settings}
