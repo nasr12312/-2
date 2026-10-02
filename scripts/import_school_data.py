@@ -30,7 +30,7 @@ FORM_FILES = [
 ]
 
 TEACHERS = [
-    ("عبد الرحمن علي نصر الله", "head_teacher"),
+    ("عبد الرحمن علي نصر الله", "teacher"),
     ("أحمد عبد الله العامري", "teacher"),
     ("ياسين حسين علي", "teacher"),
     ("هاشم الهنداوي", "supervisor_teacher"),

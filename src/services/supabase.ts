@@ -8,7 +8,7 @@ export const remoteEnabled=Boolean(url&&key&&!url.includes('YOUR_PROJECT'));
 export const supabase=remoteEnabled?createClient(url!,key!,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
 
 const emailFor=(code:string)=>`${code}@login.gheras.local`;
-const appRole=(role:string):Role=>role==='family'?'parent':role==='head_teacher'?'principal':role==='supervisor_teacher'?'supervisor':(['admin','principal','supervisor','teacher'].includes(role)?role:'teacher') as Role;
+const appRole=(role:string):Role=>role==='family'?'parent':role==='head_teacher'?'teacher':role==='supervisor_teacher'?'teacher':(['admin','principal','supervisor','teacher'].includes(role)?role:'teacher') as Role;
 
 export async function signInWithCode(code:string){
  if(!supabase)throw new Error('قاعدة البيانات غير مهيأة.');
@@ -41,7 +41,7 @@ export async function loadRemoteDatabase():Promise<{db:Database;userId:string;se
  if(!profile.active)throw new Error('هذا الحساب معطّل.');
  const classRows=classesResult.data||[];
  const classNumber=new Map(classRows.map((row,index)=>[row.id,index+1]));
- const classes=classRows.map((row,index)=>({id:index+1,remoteId:row.id,name:`${row.program_id==='diploma'?'الدبلومة':'ثنائي اللغة'} • ${row.stage} • ${row.name}`,teacher:'يُحدد من التوزيع',teacherId:'',program:row.program_id,stage:row.stage,grade:row.grade}));
+ const classes=classRows.map((row,index)=>({id:index+1,remoteId:row.id,name:`${row.program_id==='diploma'?'الدبلومة':'ثنائي اللغة'} • ${row.stage} • ${row.section==='غير موزع'?row.grade:row.name}`,teacher:'يُحدد من التوزيع',teacherId:'',program:row.program_id,stage:row.stage,grade:row.grade}));
  const studentRows=studentsResult.data||[];
  const studentNumber=new Map(studentRows.map((row,index)=>[row.id,index+1]));
  const students=studentRows.map((row,index)=>({id:index+1,remoteId:row.id,name:row.full_name,classId:classNumber.get(row.class_id)||0,academicId:row.national_id||'بانتظار الرقم الوطني',parentName:'ولي الأمر',level:'بانتظار التقييم',points:0,badge:'طالب غراس',active:row.active,program:row.program_id}));
@@ -50,7 +50,7 @@ export async function loadRemoteDatabase():Promise<{db:Database;userId:string;se
  const ownStudentIds=students.map(student=>student.id);
  const currentUser:User={id:user.id,name:profile.full_name,role:appRole(profile.role),active:true,password:'',classIds:ownClassIds,studentIds:profile.role==='family'?ownStudentIds:[]};
  const db=seed();
- db.schoolPlans=(plansResult.data||[]).map(x=>({id:x.id,program:x.program_id,stage:x.stage,grade:x.grade,week:Number(x.week_label),day:x.day_name,track:x.assignment_type,text:x.assignment_text}));db.users=[currentUser];db.classes=classes;db.students=students;db.evaluations={};db.recitations=[];db.signatures={};db.attendance={};db.messages=[];db.notifications=[];db.rewards=[];db.homework=[];db.quizzes=[];db.quizResults=[];db.reports=[];db.events=[];db.supervisorNotes=[];db.notes=[];db.audit=[];
+ db.schoolPlans=(plansResult.data||[]).map(x=>({id:x.id,program:x.program_id,stage:x.stage,grade:x.grade,week:Number(x.week_label),day:x.day_name,track:x.assignment_type,text:x.assignment_text}));db.users=[currentUser];db.classes=profile.setup_complete&&currentUser.role==='teacher'?classes.filter(c=>ownClassIds.includes(c.id)):profile.role==='family'?classes.filter(c=>students.some(s=>s.classId===c.id)):classes;db.students=students;db.evaluations={};db.recitations=[];db.signatures={};db.attendance={};db.messages=[];db.notifications=[];db.rewards=[];db.homework=[];db.quizzes=[];db.quizResults=[];db.reports=[];db.events=[];db.supervisorNotes=[];db.notes=[];db.audit=[];
  for(const item of evaluationsResult.data||[]){const sid=studentNumber.get(item.student_id);if(!sid)continue;const parts=String(item.client_key||'').split('|');const weekId=Number(parts[1]||1);const day=Number(parts[2]||0);const track=parts[3]||'الحفظ';const key=`${sid}-${weekId}-${day}-${track}`;db.evaluations[key]={studentId:sid,weekId,day,track,grade:item.grade,scores:Array.isArray(item.scores)&&item.scores.length?item.scores:[item.score||0,0,0,0,0,0],self:[],review:[],notes:item.notes||'',teacherId:item.teacher_id,createdAt:item.evaluated_at};}
  db.recitations=(recitationsResult.data||[]).flatMap(item=>{const sid=studentNumber.get(item.student_id);return sid?[{id:item.id,studentId:sid,weekId:Number(item.assignment?.weekId||1),track:item.assignment?.track||'الحفظ',surah:item.assignment?.surah||'المقرر الحالي',fromAyah:Number(item.assignment?.fromAyah||1),toAyah:Number(item.assignment?.toAyah||1),fileName:item.file_name||'تسميع',mimeType:item.mime_type||item.media_type+'/webm',size:item.file_size||0,submittedAt:item.submitted_at,submittedBy:item.submitted_by,status:item.status,grade:item.grade||undefined,teacherNotes:item.teacher_notes||undefined,evaluatedAt:item.evaluated_at||undefined,evaluatedBy:item.evaluated_by||undefined}]:[]});
  db.notifications=(notificationsResult.data||[]).map(item=>({id:item.id,studentId:item.student_id?studentNumber.get(item.student_id):undefined,title:item.title,page:item.page,readBy:item.read_at?[user.id]:[],date:item.created_at}));
