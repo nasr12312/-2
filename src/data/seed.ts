@@ -1,0 +1,4 @@
+import type {Database,Role,Permission} from '../types';
+export function seed():Database {
+ return {version:1,users:[],students:[],classes:[],evaluations:{},recitations:[],signatures:{},attendance:{},messages:[],notifications:[],rewards:[],homework:[],quizzes:[],quizResults:[],reports:[],events:[],supervisorNotes:[],notes:[],audit:[],permissions:{admin:['students','editStudents','evaluation','attendance','reports','messages','admin','supervision'],principal:['students','editStudents','evaluation','attendance','reports','messages','admin','supervision'],supervisor:['students','reports','messages','supervision','evaluation'],teacher:['students','evaluation','attendance','reports','messages'],parent:[],student:[]} as Record<Role,Permission[]>,settings:{school:'مدارس غراس الأخلاق الأهلية',term:'الفصل الدراسي الأول',year:'1448',theme:'glass',mode:'dark',density:'comfortable',fontSize:16,notifications:true,logo:import.meta.env.BASE_URL+'logo.png'}};
+}

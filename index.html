@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="icon" href="%BASE_URL%logo.png" />
+    <meta name="theme-color" content="#022C22" />
+    <title>غراس | المنصة التعليمية الرقمية</title>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script>
+      if (location.protocol === 'file:') {
+        document.documentElement.style.background = '#022c22';
+        document.getElementById('root').innerHTML = `
+          <main style="min-height:100vh;display:grid;place-items:center;padding:24px;font-family:Tahoma,Arial,sans-serif;background:radial-gradient(circle at 20% 10%,#176b4a55,transparent 45%),#022c22;color:#fff;text-align:center">
+            <section style="width:min(560px,100%);padding:38px;border:1px solid #ffffff22;border-radius:24px;background:#ffffff0d;box-shadow:0 24px 70px #0004">
+              <img src="./شعار غراس.png" alt="مدارس غراس الأخلاق الأهلية" style="width:230px;max-width:80%;margin-bottom:22px" />
+              <h1 style="margin:0 0 12px;font-size:28px">المنصة جاهزة للتشغيل</h1>
+              <p style="margin:0 0 26px;color:#c8d8cf;line-height:2">فتحتَ ملف المشروع مباشرة، لذلك لا يستطيع المتصفح تحميل التطبيق. أغلق هذه الصفحة ثم شغّل الملف <b style="color:#f3d46b">تشغيل منصة غراس.cmd</b> الموجود في المجلد نفسه.</p>
+              <a href="./تشغيل منصة غراس.cmd" download style="display:inline-block;padding:13px 22px;border-radius:10px;background:#d4af37;color:#143526;text-decoration:none;font-weight:bold">تنزيل ملف التشغيل من المجلد</a>
+              <p style="font-size:12px;margin-top:20px;color:#8eaa9a">بعد التشغيل ستفتح المنصة تلقائيًا على العنوان الصحيح.</p>
+            </section>
+          </main>`;
+      }
+    </script>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
+

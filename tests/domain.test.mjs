@@ -1,0 +1,8 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {visibleStudents,dailyRange,evaluationKey,attendanceRate,gradeQuiz} from '../src/utils/domain.mjs';
+test('role scope prevents parent and student from reading other children',()=>{const students=[{id:1,classId:1},{id:2,classId:1},{id:3,classId:2}];assert.deepEqual(visibleStudents({role:'parent',studentIds:[1]},students),[students[0]]);assert.deepEqual(visibleStudents({role:'student',studentIds:[2]},students),[students[1]]);assert.equal(visibleStudents({role:'teacher',classIds:[1]},students).length,2);assert.equal(visibleStudents({role:'supervisor'},students).length,3)});
+test('daily verse distribution preserves week boundaries without gaps',()=>{for(const [from,to,days] of [[33,64,5],[1,32,4],[85,111,5],[94,123,5]]){const ranges=Array.from({length:days},(_,d)=>dailyRange(from,to,d,days).split('–').map(Number));assert.equal(ranges[0][0],from);assert.equal(ranges.at(-1)[1],to);for(let i=1;i<days;i++)assert.equal(ranges[i][0],ranges[i-1][1]+1)}});
+test('evaluation records isolate student, week, day and track',()=>{assert.notEqual(evaluationKey(1,6,3,'الحفظ'),evaluationKey(2,6,3,'الحفظ'));assert.notEqual(evaluationKey(1,6,3,'الحفظ'),evaluationKey(1,6,3,'التلاوة'))});
+test('attendance includes excused/late and avoids division by zero',()=>{assert.equal(attendanceRate([]),0);assert.equal(attendanceRate([{status:'حاضر'},{status:'متأخر'},{status:'مستأذن'},{status:'غائب'}]),75)});
+test('quiz scores only correct trimmed answers',()=>{assert.equal(gradeQuiz([{id:'a',answer:'أربعة'},{id:'b',answer:'صح'}],{a:' أربعة ',b:'خطأ'}),1)});
