@@ -8,8 +8,9 @@ import type {Classroom,SchoolPlanEntry} from '../types';
 function normalized(value:string){return value.replace(/[أإآ]/g,'ا').replace(/ة/g,'ه').replace(/\s/g,'')}
 export function entriesForClass(entries:SchoolPlanEntry[],classroom?:Classroom){
  if(!classroom)return [];
- const grade=normalized(classroom.grade||'');const middle=normalized(classroom.stage||'').includes('متوسط');
- return entries.filter(entry=>entry.program===classroom.program&&normalized(entry.stage).includes(middle?'متوسط':'ابتدا')&&normalized(entry.grade).includes(grade));
+ const grade=normalized(classroom.grade||'');const stage=normalized(classroom.stage||'');
+ const stageKey=stage.includes('متوسط')?'متوسط':stage.includes('ثانو')?'ثانو':stage.includes('ابتدا')?'ابتدا':stage;
+ return entries.filter(entry=>entry.program===classroom.program&&normalized(entry.stage).includes(stageKey)&&normalized(entry.grade).includes(grade));
 }
 
 export function SchoolRoster(){
