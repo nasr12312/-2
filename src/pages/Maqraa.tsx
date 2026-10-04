@@ -26,7 +26,7 @@ export function Reader(){
 function RemoteFamilyAssignment({submissions}:{submissions:RecitationSubmission[]}){
  const {db,students,submitRecitation}=useApp();const [selectedStudent,setSelectedStudent]=useState(students[0]?.id);const student=students.find(s=>s.id===selectedStudent)||students[0];
  const entries=entriesForClass(db.schoolPlans||[],db.classes.find(c=>c.id===student?.classId));
- const homework=(db.quranHomework||[]).filter(h=>h.class_id===db.classes.find(c=>c.id===student?.classId)?.remoteId&&(!h.student_id||h.student_id===student?.remoteId));const [homeworkId,setHomeworkId]=useState('');const selectedHomework=homework.find(h=>h.id===homeworkId);const focus=calendarFocus(db.settings.termStartDate);const [entryId,setEntryId]=useState('');const entry=entries.find(x=>x.id===entryId)||entries.find(x=>x.week===focus.week&&dayIndex(x.day)===focus.day);
+ const homework=(db.quranHomework||[]).filter(h=>!h.cancelled&&h.class_id===db.classes.find(c=>c.id===student?.classId)?.remoteId&&(!h.student_id||h.student_id===student?.remoteId));const [homeworkId,setHomeworkId]=useState('');const selectedHomework=homework.find(h=>h.id===homeworkId);const focus=calendarFocus(db.settings.termStartDate);const [entryId,setEntryId]=useState('');const entry=entries.find(x=>x.id===entryId)||entries.find(x=>x.week===focus.week&&dayIndex(x.day)===focus.day);
  const [surahId,setSurahId]=useState(1);const [from,setFrom]=useState(1);const [to,setTo]=useState(7);
  const [file,setFile]=useState<File|null>(null);const [sending,setSending]=useState(false);
  if(!student)return <Empty/>;

@@ -42,7 +42,7 @@ export async function loadRemoteDatabase():Promise<{db:Database;userId:string;se
  if(!profile.active)throw new Error('هذا الحساب معطّل.');
  const classRows=classesResult.data||[];
  const classNumber=new Map(classRows.map((row,index)=>[row.id,index+1]));
- const classes=classRows.map((row,index)=>({id:index+1,remoteId:row.id,name:`${row.program_id==='diploma'?'الدبلومة':'ثنائي اللغة'} • ${row.stage} • ${row.section==='غير موزع'?row.grade:row.name}`,teacher:'يُحدد من التوزيع',teacherId:'',program:row.program_id,stage:row.stage,grade:row.grade}));
+ const classes=classRows.map((row,index)=>({id:index+1,remoteId:row.id,name:`${row.program_id==='diploma'?'الدبلومة':'ثنائي اللغة'} • ${row.stage} • ${row.name.replace(/\s*-\s*غير موزع/g,'')}`,teacher:'يُحدد من التوزيع',teacherId:'',program:row.program_id,stage:row.stage,grade:row.grade}));
  const studentRows=studentsResult.data||[];
  const studentNumber=new Map(studentRows.map((row,index)=>[row.id,index+1]));
  const students=studentRows.map((row,index)=>({id:index+1,remoteId:row.id,name:row.full_name,classId:classNumber.get(row.class_id)||0,academicId:row.national_id||'بانتظار الرقم الوطني',parentName:'ولي الأمر',level:'بانتظار التقييم',points:0,badge:'طالب غراس',active:row.active,program:row.program_id}));

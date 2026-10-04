@@ -1,0 +1,8 @@
+create or replace function private.follow_homework(target uuid,child text) returns void language plpgsql security definer set search_path='' as $$declare h public.quran_homework;begin
+select * into h from public.quran_homework where id=target and not cancelled;
+if private.current_role() is distinct from 'family' or h.id is null or not exists(select 1 from public.family_students f join public.students s on s.id=f.student_id where f.user_id=auth.uid() and s.id=child and s.active and s.class_id=h.class_id and (h.student_id is null or h.student_id=s.id)) then raise exception 'غير مسموح' using errcode='42501';end if;
+insert into public.homework_followups(homework_id,student_id,parent_id,homework_version) values(h.id,child,auth.uid(),h.updated_at) on conflict(homework_id,student_id,parent_id) do update set homework_version=excluded.homework_version,followed_at=now();
+end$$;
+create or replace function private.follow_evaluation(target uuid) returns void language plpgsql security definer set search_path='' as $$declare v public.evaluations;begin select * into v from public.evaluations where id=target;
+if private.current_role() is distinct from 'family' or v.id is null or not exists(select 1 from public.family_students where user_id=auth.uid() and student_id=v.student_id) then raise exception 'غير مسموح' using errcode='42501';end if;
+insert into public.evaluation_followups(evaluation_id,parent_id,evaluation_version) values(v.id,auth.uid(),v.evaluated_at) on conflict(evaluation_id,parent_id) do update set evaluation_version=excluded.evaluation_version,followed_at=now();end$$;
