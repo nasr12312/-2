@@ -1,0 +1,5 @@
+update storage.buckets set file_size_limit=52428800 where id='recitations';
+create function private.recitation_upload_limits() returns jsonb language sql stable security definer set search_path='' as $$select jsonb_build_object('maximum_bytes',least(coalesce(file_size_limit,52428800),209715200),'prepared_bytes',209715200) from storage.buckets where id='recitations' and private.current_role() is not null$$;
+create function public.recitation_upload_limits() returns jsonb language sql stable security invoker set search_path='' as $$select private.recitation_upload_limits()$$;
+revoke all on function private.recitation_upload_limits(),public.recitation_upload_limits() from public,anon;
+grant execute on function private.recitation_upload_limits(),public.recitation_upload_limits() to authenticated;

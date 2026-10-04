@@ -1,0 +1,4 @@
+export const normalizeQuran=value=>String(value).normalize('NFKD').replace(/[\u0610-\u061a\u064b-\u065f\u0670\u06d6-\u06ed]/g,'').replace(/[أإآٱ]/g,'ا').replace(/ى/g,'ي').replace(/ـ/g,'').trim();
+export function flattenQuran(surahs){return surahs.flatMap(s=>s.ayahs.map(a=>({...a,surah:s.number,surahName:s.name})));}
+export function clampRange(start,end,total){const from=Math.max(1,Math.min(total,Number(start)||1));return {from,to:Math.max(from,Math.min(total,Number(end)||from))};}
+export function nextPractice(index,from,to,verseCount,verseRepeat,rangeCount,rangeRepeat){if(verseCount<verseRepeat)return {index,verseCount:verseCount+1,rangeCount,done:false};if(index<to)return {index:index+1,verseCount:1,rangeCount,done:false};if(rangeCount<rangeRepeat)return {index:from,verseCount:1,rangeCount:rangeCount+1,done:false};return {index,verseCount,rangeCount,done:true};}

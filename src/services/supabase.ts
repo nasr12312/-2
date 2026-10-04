@@ -1,3 +1,4 @@
+import {resumableRecitation,type UploadOptions} from './resumable-upload';
 import {createClient} from '@supabase/supabase-js';
 import {seed} from '../data/seed';
 import type {Database,Role,User} from '../types';
@@ -69,16 +70,7 @@ export async function saveTeacherClasses(classRemoteIds:string[]){
  const {error:updateError}=await supabase.from('profiles').update({setup_complete:true}).eq('user_id',user.id);if(updateError)throw updateError;
 }
 
-export async function uploadRemoteRecitation(file:File,studentRemoteId:string,assignment:Record<string,string|number>){
- if(!supabase)throw new Error('قاعدة البيانات غير مهيأة.');
- const {data:{user}}=await supabase.auth.getUser();if(!user)throw new Error('انتهت جلسة الدخول.');
- const extension=file.name.split('.').pop()?.replace(/[^a-zA-Z0-9]/g,'')||'webm';
- const path=`${studentRemoteId}/${crypto.randomUUID()}.${extension}`;
- const {error:uploadError}=await supabase.storage.from('recitations').upload(path,file,{contentType:file.type,upsert:false});if(uploadError)throw uploadError;
- const id=crypto.randomUUID();
- const {error:rowError}=await supabase.from('recitation_submissions').insert({id,student_id:studentRemoteId,storage_path:path,media_type:file.type.startsWith('video/')?'video':'audio',submitted_by:user.id,assignment,file_name:file.name,mime_type:file.type,file_size:file.size});if(rowError)throw rowError;
- return id;
-}
+export async function uploadRemoteRecitation(file:File,studentRemoteId:string,assignment:Record<string,string|number>,options:UploadOptions={}){if(!supabase)throw Error('قاعدة البيانات غير مهيأة.');return resumableRecitation(supabase,url!,file,studentRemoteId,assignment,options);}
 
 export async function syncRemoteEvaluations(before:Database,after:Database,userId:string){
  if(!supabase)return;
