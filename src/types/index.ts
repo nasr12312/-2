@@ -1,6 +1,6 @@
 export type Role='teacher'|'supervisor'|'parent'|'admin'|'principal'|'student';
 export type Permission='students'|'editStudents'|'evaluation'|'attendance'|'reports'|'messages'|'admin'|'supervision';
-export interface User {remoteRole?:string;id:string;name:string;role:Role;active:boolean;password:string;classIds:number[];studentIds:number[];lastLogin?:string}
+export interface User {avatar?:string;reduceMotion?:boolean;remoteRole?:string;id:string;name:string;role:Role;active:boolean;password:string;classIds:number[];studentIds:number[];lastLogin?:string}
 export interface Student {id:number;remoteId?:string;name:string;classId:number;academicId:string;parentName:string;level:string;points:number;badge:string;active:boolean;program?:string}
 export interface Classroom {id:number;remoteId?:string;name:string;teacher:string;teacherId:string;program?:string;stage?:string;grade?:string}
 export interface SchoolPlanEntry {id:string;program:string;stage:string;grade:string;week:number;day:string;track:string;text:string}

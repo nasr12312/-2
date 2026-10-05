@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';import {reportPeriod,csvCell} from '../src/utils/report-period.mjs';
+test('weekly reports follow Sunday across month and year boundaries',()=>{assert.deepEqual(reportPeriod('2026-10-05','week'),{from:'2026-10-04',to:'2026-10-10'});assert.deepEqual(reportPeriod('2027-01-01','week'),{from:'2026-12-27',to:'2027-01-02'})});
+test('monthly reports handle leap years and invalid dates',()=>{assert.deepEqual(reportPeriod('2028-02-22','month'),{from:'2028-02-01',to:'2028-02-29'});assert.throws(()=>reportPeriod('2026-02-30','day'))});
+test('spreadsheet exports quote content and neutralize formula prefixes',()=>{assert.equal(csvCell('=1+1'),'"\'=1+1"');assert.equal(csvCell('a"b'),'"a""b"');assert.equal(csvCell('  @test'),'"\'  @test"')});
