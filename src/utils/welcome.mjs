@@ -1,0 +1,3 @@
+export const welcomePresetIds=['rahman','prayer','knowledge','reading','guidance','ease'];
+export function chosenPassage(ids,mode,date){const allowed=[...new Set(ids.filter(id=>welcomePresetIds.includes(id)))];if(!allowed.length)return 'rahman';if(mode!=='daily')return allowed[0];const day=Math.floor(Date.parse(date+'T00:00:00Z')/86400000);return allowed[Number.isFinite(day)?((day%allowed.length)+allowed.length)%allowed.length:0];}
+export function alafasyVerseUrl(surah,ayah){if(!Number.isInteger(surah)||surah<1||surah>114||!Number.isInteger(ayah)||ayah<1||ayah>286)throw Error('Invalid verse');return `https://everyayah.com/data/Alafasy_128kbps/${String(surah).padStart(3,'0')}${String(ayah).padStart(3,'0')}.mp3`;}

@@ -1,0 +1,38 @@
+begin;
+do $test$
+declare administrator uuid; teacher uuid; family uuid; original public.platform_presentation; blocked boolean; health jsonb; student public.students; classroom public.classes; changed integer;
+begin
+select user_id into administrator from public.profiles where active and role='admin' limit 1;
+select user_id into teacher from public.profiles where active and role='teacher' limit 1;
+select user_id into family from public.profiles where active and role='family' limit 1;
+select * into original from public.platform_presentation where id;
+select * into classroom from public.classes where active and section='1' limit 1;
+blocked:=false;begin insert into public.classes(id,program_id,stage,grade,section,name) values(gen_random_uuid()::text,classroom.program_id,classroom.stage,classroom.grade,' ١ ','تحقق ملغى');exception when unique_violation then blocked:=true;end;
+if not blocked then raise exception 'Normalized duplicate class was allowed';end if;
+select * into student from public.students where active limit 1;
+blocked:=false;begin insert into public.students(id,full_name,national_id,program_id,class_id,account_status,active) values(gen_random_uuid()::text,student.full_name,student.national_id,student.program_id,student.class_id,'active',true);exception when unique_violation then blocked:=true;end;
+if not blocked then raise exception 'Duplicate enrollment allowed';end if;
+blocked:=false;begin insert into public.students(id,full_name,national_id,program_id,class_id,account_status,active) values(gen_random_uuid()::text,'تحقق ملغى','123',student.program_id,student.class_id,'active',true);exception when check_violation then blocked:=true;end;
+if not blocked then raise exception 'Invalid student identifier allowed';end if;
+perform set_config('request.jwt.claims',jsonb_build_object('sub',administrator,'role','authenticated')::text,true);set local role authenticated;
+health:=public.platform_roster_health();if (health->>'duplicate_students')::integer<>0 or (health->>'duplicate_classes')::integer<>0 then raise exception 'Roster integrity failed';end if;
+perform public.save_platform_configuration(original.school_label,'الفصل الدراسي الأول','1448','2026-08-23',to_jsonb(original)||jsonb_build_object('welcome_enabled',false,'welcome_volume',0.4));
+if exists(select 1 from public.platform_presentation where welcome_enabled) then raise exception 'Administrator cannot change presentation';end if;
+blocked:=false;begin update public.platform_presentation set logo_data='data:image/svg+xml;base64,PHN2Zz4=';exception when check_violation then blocked:=true;end;
+if not blocked then raise exception 'Untrusted logo format accepted';end if;
+blocked:=false;begin update public.platform_presentation set welcome_presets=array['reading','reading'];exception when check_violation then blocked:=true;end;
+if not blocked then raise exception 'Duplicate welcome selection accepted';end if;
+perform set_config('request.jwt.claims',jsonb_build_object('sub',teacher,'role','authenticated')::text,true);
+update public.platform_presentation set platform_name='تغيير غير مسموح';get diagnostics changed=row_count;if changed<>0 then raise exception 'Teacher changed global presentation';end if;
+blocked:=false;begin perform public.save_platform_configuration(original.school_label,'اختبار','1448','2026-08-23',to_jsonb(original));exception when insufficient_privilege then blocked:=true;end;
+if not blocked then raise exception 'Teacher saved global configuration';end if;
+perform set_config('request.jwt.claims',jsonb_build_object('sub',family,'role','authenticated')::text,true);
+blocked:=false;begin perform public.platform_roster_health();exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'Parent accessed administrative health';end if;
+reset role;set local role anon;
+if (select count(*) from public.platform_presentation)<>1 then raise exception 'Public welcome configuration missing';end if;
+blocked:=false;begin update public.platform_presentation set welcome_enabled=true;exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'Anonymous presentation write allowed';end if;
+blocked:=false;begin perform public.platform_roster_health();exception when insufficient_privilege then blocked:=true;end;if not blocked then raise exception 'Anonymous administrative health allowed';end if;
+reset role;
+end $test$;
+select 'PASS: public welcome read only, administrator settings, teacher and family denied, valid logo and selections, normalized class and enrollment deduplication; all writes rolled back.' as result;
+rollback;

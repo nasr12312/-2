@@ -1,3 +1,4 @@
+import type {WelcomeConfig} from '../data/welcome';
 export type Role='teacher'|'supervisor'|'parent'|'admin'|'principal'|'student';
 export type Permission='students'|'editStudents'|'evaluation'|'attendance'|'reports'|'messages'|'admin'|'supervision';
 export interface User {avatar?:string;reduceMotion?:boolean;remoteRole?:string;id:string;name:string;role:Role;active:boolean;password:string;classIds:number[];studentIds:number[];lastLogin?:string}
@@ -21,7 +22,7 @@ export interface SchoolEvent {id:string;title:string;date:string;type:string;cla
 export interface SupervisorNote {id:string;teacherId:string;type:string;body:string;date:string}
 export interface AuditLog {id:string;actor:string;action:string;date:string}
 export interface StudentNote {id:string;studentId:number;body:string;date:string;author:string}
-export interface Settings {termStartDate?:string;school:string;term:string;year:string;theme:string;mode:string;density:string;fontSize:number;notifications:boolean;logo:string}
+export interface Settings {presentation?:WelcomeConfig;termStartDate?:string;school:string;term:string;year:string;theme:string;mode:string;density:string;fontSize:number;notifications:boolean;logo:string}
 export interface EvaluationFollowup {evaluation_id:string;parent_id:string;evaluation_version:string;followed_at:string}
 export interface QuranHomework {updated_at?:string;cancelled?:boolean;id:string;teacher_id:string;class_id:string;student_id:string|null;kind:string;title:string;instructions:string;due_date:string;created_at:string}
 export interface HomeworkFollowup {homework_version?:string;homework_id:string;student_id:string;parent_id:string;followed_at:string}
