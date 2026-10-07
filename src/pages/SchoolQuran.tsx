@@ -23,13 +23,13 @@ export function SchoolRoster(){
 
 export default function SchoolQuran(){const {user}=useApp();return user?.role==='parent'?<FamilyOverview/>:<TeacherQuran/>}
 function TeacherQuran(){
- const {db,user,students,notify,navigate,page,refresh}=useApp();const family=user?.role==='parent';
+ const {db,user,students,notify,navigate,page,refresh,studentId}=useApp();const family=user?.role==='parent';
  const availableClasses=db.classes.filter(c=>students.some(s=>s.classId===c.id));
- const [classId,setClassId]=useState(availableClasses[0]?.id||0);const classroom=availableClasses.find(c=>c.id===classId)||availableClasses[0];
+ const [classId,setClassId]=useState(students.find(s=>s.id===studentId)?.classId||availableClasses[0]?.id||0);const classroom=availableClasses.find(c=>c.id===classId)||availableClasses[0];
  const [extraPlans,setExtraPlans]=useState<SchoolPlanEntry[]>([]);const [newAssignment,setNewAssignment]=useState('');const [adding,setAdding]=useState(false);
  const focus=calendarFocus(db.settings.termStartDate);const [selectedDay,setSelectedDay]=useState(focus.day);const [variant,setVariant]=useState(0);const [written,setWritten]=useState('');const [encourage,setEncourage]=useState('');const [nextStep,setNextStep]=useState('');const [week,setWeek]=useState(focus.week);const [track,setTrack]=useState(page==='recitation'?'تلاوة':'حفظ');const [entryId,setEntryId]=useState('');
  const entries=entriesForClass([...(db.schoolPlans||[]),...extraPlans],classroom);const weekEntries=entries.filter(e=>e.week===week&&e.track===track);const entry=weekEntries.find(e=>e.id===entryId)||weekEntries.find(e=>dayIndex(e.day)===selectedDay);
- const roster=students.filter(s=>s.classId===classroom?.id);const [selectedId,setSelectedId]=useState(0);const student=roster.find(s=>s.id===selectedId)||roster[0];
+ const roster=students.filter(s=>s.classId===classroom?.id);const [selectedId,setSelectedId]=useState(studentId);const student=roster.find(s=>s.id===selectedId)||roster[0];
  const [search,setSearch]=useState('');const [pendingOnly,setPendingOnly]=useState(false);const [notes,setNotes]=useState('');const [saving,setSaving]=useState(false);
  const [chosen,setChosen]=useState<{grade:string;score:number}|null>(null);const [oneClick,setOneClick]=useState(false);const [autoNext,setAutoNext]=useState(true);const [saved,setSaved]=useState<Record<string,{grade:string;notes:string;date:string}>>({});
  const day=entry?Math.max(0,dayIndex(entry.day)):selectedDay;const evalTrack=track==='حفظ'?'الحفظ':'التلاوة';
