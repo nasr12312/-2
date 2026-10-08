@@ -1,6 +1,7 @@
+import {academicFocus} from './academic-dates.mjs';
 export const schoolDays=['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
 export function riyadhDate(value=new Date().toISOString()){return new Date(value).toLocaleDateString('sv-SE',{timeZone:'Asia/Riyadh'})}
-export function calendarFocus(start='2026-08-23',value=riyadhDate()){const date=riyadhDate(value.length===10?value+'T12:00:00Z':value);const delta=Math.floor((Date.parse(date+'T12:00:00Z')-Date.parse(start+'T12:00:00Z'))/86400000);const rawWeek=Math.floor(delta/7)+1;const day=new Date(date+'T12:00:00Z').getUTCDay();return {date,week:Math.max(1,Math.min(17,rawWeek)),rawWeek,day,dayName:schoolDays[day],schoolDay:day<5&&rawWeek>0&&rawWeek<=17,inTerm:rawWeek>0&&rawWeek<=17}}
+export function calendarFocus(start='2026-08-23',value=riyadhDate()){const date=riyadhDate(value.length===10?value+'T12:00:00Z':value);const focus=academicFocus(date,start);return {date,...focus,dayName:schoolDays[focus.day]}}
 export function dayIndex(text){const n=text.replace(/[أإآ]/g,'ا');return schoolDays.findIndex(d=>n.includes(d.replace(/[أإآ]/g,'ا')))}
 const phrases=[
 ['أداء متميز في المقرر','مستوى رائع يستحق التقدير','نتيجة عالية في متابعة اليوم','إنجاز متقن في هذا التقييم','تميّز واضح في مستوى الأداء','متابعة ممتازة للمقرر'],
