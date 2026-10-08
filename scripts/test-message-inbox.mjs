@@ -17,6 +17,8 @@ try{for(const family of [false,true]){
   else if(path.endsWith('/students'))value=students;
   else if(path.endsWith('/family_students'))value=students.map(s=>({user_id:uid,student_id:s.id,students:s}));
   else if(path.endsWith('/teacher_class_assignments'))value=[{teacher_id:teacher,class_id:cls.id}];
+  else if(path.endsWith('/rpc/visible_evaluations'))value=students.map((s,i)=>({id:'evaluation-'+i,student_id:s.id,teacher_id:teacher,grade:'جيد',score:3,scores:[3,3,3,3,3,3],evaluated_at:'2026-10-08T08:00:00Z',client_key:s.id+'|7|4|الحفظ'}));
+  else if(path.endsWith('/evaluation_followups'))value=[{evaluation_id:'evaluation-0',parent_id:parent,evaluation_version:'2026-10-08T08:00:00Z',followed_at:'2026-10-08T09:00:00Z'}];
   else if(path.endsWith('/platform_settings'))value={school:'غراس',year:1448,term_start_date:'2026-08-23'};
   else if(path.endsWith('/account_preferences')||path.endsWith('/platform_presentation'))value=null;
   else if(path.endsWith('/auth/v1/user'))value={id:uid,email:'test@login.gheras.local'};
@@ -26,6 +28,7 @@ try{for(const family of [false,true]){
  await page.goto('http://127.0.0.1:5174/');
  await page.getByRole('button',{name:'التواصل الخاص',exact:true}).click({timeout:25000});
  await page.locator('.conversation-card').first().waitFor();assert.equal(await page.locator('.conversation-card').count(),2);
+ assert.equal(await page.evaluate(()=>window.scrollY),0,'Opening messages must not jump the whole page');
  assert.equal(await page.getByLabel('الطالب والبرنامج').inputValue(),'student-1');
  const sender=family?'المعلم الثاني':'ولي الاختبار الثاني';
  await page.getByRole('button',{name:'الرد على '+sender,exact:true}).click();
@@ -35,5 +38,16 @@ try{for(const family of [false,true]){
  assert.equal(sent.length,1);assert.equal(sent[0].student_id,'student-1');assert.equal(sent[0].teacher_id,family?other:teacher);assert.equal(sent[0].sender_id,uid);
  await page.getByLabel('البحث في الرسائل والمرسل والطالب').fill(family?'المعلم الأول':'ولي الاختبار الأول');assert.equal(await page.locator('.conversation-card').count(),1);
  await page.locator('.conversation-card').click();assert.equal(await page.getByLabel('الطالب والبرنامج').inputValue(),'student-0');
+ if(!family){
+  await page.getByRole('button',{name:'متابعة أولياء الأمور',exact:true}).click();
+  await page.getByLabel('فترة متابعة الأسر').selectOption('all');
+  const completed=page.locator('.followup-status-grid button').filter({hasText:'تابع الجميع'});
+  assert.equal(await completed.locator('b').innerText(),'1');
+  await page.locator('.followup-status-grid button').filter({hasText:'لم يتابع'}).click();
+  assert.equal(await page.locator('tbody tr').count(),1);assert.ok((await page.locator('tbody').innerText()).includes('طالب الاختبار الثاني'));
+  await page.getByRole('button',{name:'التواصل الخاص',exact:true}).click();
+  await page.locator('.conversation-card').first().waitFor();assert.equal(await page.evaluate(()=>window.scrollY),0);
+  await page.screenshot({path:'private-data/family-followup-navigation-test.png'});
+ }else assert.equal(await page.getByRole('button',{name:'متابعة أولياء الأمور',exact:true}).count(),0);
  await page.close();console.log((family?'Family':'Teacher')+': inbox, sender, correct reply destination and search passed');
 }}finally{await browser.close()}

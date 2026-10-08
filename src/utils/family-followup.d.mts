@@ -1,0 +1,2 @@
+import type {Student,QuranEvaluation,EvaluationFollowup,QuranHomework,HomeworkFollowup,Classroom} from '../types';
+export function familyFollowupRows(students:Student[],evaluations:QuranEvaluation[],followups:EvaluationFollowup[],homework:QuranHomework[],homeworkFollowups:HomeworkFollowup[],classes:Classroom[],period?:{from?:string;to?:string}):{student:Student;total:number;done:number;pending:number;evaluationTotal:number;evaluationDone:number;homeworkTotal:number;homeworkDone:number;last:string;status:string}[];

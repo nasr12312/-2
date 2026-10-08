@@ -1,5 +1,5 @@
 import {PREPARED_UPLOAD_BYTES,type UploadOptions} from './resumable-upload';
-import React,{createContext,useContext,useState,useEffect} from 'react';
+import React,{createContext,useContext,useState,useEffect,useMemo} from 'react';
 import {seed} from '../data/seed';
 import {visibleStudents} from '../utils/domain.mjs';
 import {saveMediaBlob} from './media';
@@ -24,7 +24,7 @@ export function AppProvider({children}:{children:React.ReactNode}){
  const notify=(s:string)=>setToast(s);const refresh=async()=>{if(!remoteEnabled)return;const result=await loadRemoteDatabase();setDb(result.db);setUserId(result.userId);setSetupNeeded(result.setupNeeded)};
  useEffect(()=>{if(!toast)return;const t=setTimeout(()=>setToast(''),3500);return()=>clearTimeout(t)},[toast]);
  useEffect(()=>{if(remoteEnabled){loadRemoteDatabase().then(result=>{setDb(result.db);setUserId(result.userId);setSetupNeeded(result.setupNeeded);setPage(result.db.users.find(u=>u.id===result.userId)?.role==='teacher'?'quran':'dashboard')}).catch(()=>{}).finally(()=>setAuthLoading(false));return;}try{if(!localStorage.getItem(KEY))localStorage.setItem(KEY,JSON.stringify(db));}catch{setError('تعذر حفظ البيانات محليًا. تحقق من المساحة وإعدادات المتصفح.')}},[]);
- const students:Student[]=user?visibleStudents(user,db.students):[];
+ const students:Student[]=useMemo(()=>user?visibleStudents(user,db.students):[],[user,db.students]);
  useEffect(()=>{if(students.length&&!students.some(s=>s.id===studentId))selectStudent(students[0].id)},[userId]);
  const can=(p:Permission)=>(!remoteEnabled||p!=='editStudents')&&!!user&&user.role!=='parent'&&db.permissions[user.role].includes(p);
  const mutate=(action:string,fn:(d:Database)=>void,p?:Permission,target?:number)=>{
@@ -48,4 +48,5 @@ export function AppProvider({children}:{children:React.ReactNode}){
  return <Context.Provider value={{refresh,db,user,students,page,navigate,studentId,selectStudent,classId,setClassId,can,mutate,submitRecitation,notify,login,logout,toast,error,authLoading,remoteEnabled,setupNeeded,completeTeacherSetup}}>{children}{toast&&<div className="toast" role="status">{toast}</div>}{error&&<div className="storage-error" role="alert">{error}<button onClick={()=>location.reload()}>إعادة المحاولة</button></div>}</Context.Provider>
 }
 export const useApp=()=>useContext(Context);
+
 
