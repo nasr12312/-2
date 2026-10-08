@@ -35,11 +35,12 @@ Deno.serve(async req=>{
  payload.id=id;
  if(operation==='student_move'){const target=String(input.class_id||'');if(!await owns(target))return json({error:'الشعبة المستهدفة خارج شعبك'},403);payload.class_id=target;}
  if(operation==='student_save'){
- const name=String(input.name||'').trim();const national=digits(input.national_id);const target=String(input.class_id||'');
+ const name=String(input.name||'').trim();let national=digits(input.national_id);const target=String(input.class_id||'');const temporary=input.login_is_temporary===true||!national;
+ if(!national){for(let attempt=0;attempt<12;attempt++){const random=new Uint32Array(1);crypto.getRandomValues(random);const candidate='9'+String(random[0]%1000000000).padStart(9,'0');const used=await db.from('profiles').select('user_id').eq('access_code',candidate).maybeSingle();const enrolled=await db.from('students').select('id').eq('national_id',candidate).limit(1);if(used.error||enrolled.error)throw Error('تعذر توليد الرقم المؤقت');if(!used.data&&!enrolled.data?.length){national=candidate;break}}if(!national)throw Error('تعذر تخصيص رقم غير مستخدم، حاول مجددًا');}
  if(name.length<3||name.length>150||national.length!==10)return json({error:'أدخل الاسم والرقم الوطني من 10 أرقام'},400);
  if(!await owns(target))return json({error:'الشعبة خارج نطاقك'},403);
- Object.assign(payload,{name,national_id:national,class_id:target});let familyId='';
- if(student){
+ Object.assign(payload,{name,national_id:national,class_id:target,login_is_temporary:temporary});let familyId='';
+ if(student?.national_id){
  const links=await db.from('family_students').select('user_id').eq('student_id',id);if(links.error||links.data.length!==1)throw Error('يراجع المشرف ربط حساب ولي الأمر');familyId=links.data[0].user_id;
  if(student.national_id!==national){
  const linked=await db.from('family_students').select('student_id').eq('user_id',familyId);if(linked.error)throw linked.error;

@@ -4,7 +4,7 @@ export type Permission='students'|'editStudents'|'evaluation'|'attendance'|'repo
 export interface User {avatar?:string;reduceMotion?:boolean;remoteRole?:string;id:string;name:string;role:Role;active:boolean;password:string;classIds:number[];studentIds:number[];lastLogin?:string}
 export interface Student {id:number;remoteId?:string;name:string;classId:number;academicId:string;parentName:string;level:string;points:number;badge:string;active:boolean;program?:string}
 export interface Classroom {id:number;remoteId?:string;name:string;teacher:string;teacherId:string;program?:string;stage?:string;grade?:string}
-export interface SchoolPlanEntry {id:string;program:string;stage:string;grade:string;week:number;day:string;track:string;text:string}
+export interface SchoolPlanEntry {classId?:string;id:string;program:string;stage:string;grade:string;week:number;day:string;track:string;text:string}
 export interface QuranWeek {id:number;memorization:string;memFrom:number;memTo:number;recitation:string;recFrom:number;recTo:number;holiday?:string}
 export interface QuranEvaluation {id?:string;teacherName?:string;writtenFeedback?:string;encouragement?:string;nextStep?:string;planEntryId?:string;studentId:number;weekId:number;day:number;track:string;grade:string;scores:number[];self:number[];review:number[];notes:string;teacherId:string;createdAt:string}
 export interface RecitationSubmission {id:string;studentId:number;weekId:number;track:string;surah:string;fromAyah:number;toAyah:number;fileName:string;mimeType:string;size:number;submittedAt:string;submittedBy:string;status:'pending'|'reviewed';grade?:string;teacherNotes?:string;evaluatedAt?:string;evaluatedBy?:string}
