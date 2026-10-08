@@ -1,4 +1,7 @@
-export const levels=['متفوق','متقدم','متمكن','غير مجتاز','إعادة التقييم'];
+export const levels=['متفوق','جيد جدًا','جيد','يحتاج متابعة','يحتاج دعمًا مكثفًا'];
+export const levelDescriptions=['إتقان المقرر باستقلالية','أداء جيد مع تردد بسيط','أداء مقبول مع بعض التوجيه','يحتاج مراجعة وتثبيت المقرر','يحتاج مساندة وتدرّب إضافي'];
+const legacyGrades={'متقدم':'جيد جدًا','متمكن':'جيد','غير مجتاز':'يحتاج متابعة','إعادة التقييم':'يحتاج دعمًا مكثفًا'};
+export const gradeLabel=grade=>legacyGrades[grade]||grade;
 export const roleNames={teacher:'معلم',supervisor:'مشرف تربوي',parent:'ولي أمر',admin:'مدير المنصة',principal:'مدير المدرسة',student:'طالب'};
 export const evaluationKey=(student,week,day,track='الحفظ')=>`${student}-${week}-${day}-${track}`;
 export function visibleStudents(user,students){if(['admin','principal','supervisor'].includes(user.role))return students;if(user.role==='teacher')return students.filter(s=>user.classIds.includes(s.classId));return students.filter(s=>user.studentIds.includes(s.id));}
