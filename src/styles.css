@@ -123,3 +123,5 @@ html[data-motion=reduced] *,html[data-motion=reduced] *:before,html[data-motion=
 
 .daily-recitation-status{border:1px solid var(--line);border-radius:12px;padding:14px;margin:16px 0}.daily-recitation-status>summary{cursor:pointer;font-weight:700}.daily-recitation-status .field{margin-top:16px}.daily-recitation-status>button{margin-top:12px}
 
+
+.daily-status-options{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.45rem;margin:.7rem 0}.daily-status-options button{padding:.8rem .3rem;border:1px solid var(--line,#477463);border-radius:12px;background:transparent;color:inherit;font:inherit;cursor:pointer}.daily-status-options button[aria-pressed=true]{background:#d4b460;color:#113c31;font-weight:800;border-color:#d4b460}.daily-recitation-status>.segmented{margin:.6rem 0}.daily-recitation-status>small{display:block;margin:.6rem 0}.daily-status-options button:disabled{opacity:.6;cursor:wait}.evaluation-date{font-size:.9rem;opacity:.8}.assignment-block>summary{cursor:pointer}.result-assignment .achievement-description{white-space:pre-line}

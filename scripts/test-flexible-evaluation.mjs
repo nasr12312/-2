@@ -29,7 +29,7 @@ await page.addInitScript(({teacher})=>{const encode=v=>btoa(JSON.stringify(v));c
 try{
  await page.clock.setFixedTime(new Date('2026-10-08T09:00:00Z'));
  await page.goto(process.env.TEST_BASE_URL||'http://127.0.0.1:5174/',{waitUntil:'domcontentloaded',timeout:60000});
- await page.getByLabel('وضع الطالب مع الخطة').waitFor();
+ await page.getByLabel('نوع التسميع').waitFor();
  await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();
  assert.equal(await page.locator('.grade-choice').count(),0);
  await page.getByLabel('البحث عن السورة',{exact:true}).fill('الإخلاص');
@@ -47,7 +47,7 @@ try{
  assert.ok(evaluation.notes.includes('متأخر عن الخطة'));assert.ok(evaluation.notes.includes('الإخلاص'));assert.ok(evaluation.notes.includes('مراجعة مواضع التردد'));
  await page.reload();
  await page.getByRole('button',{name:'تعديل التقييم المحفوظ',exact:true}).click();
- assert.equal(await page.getByLabel('وضع الطالب مع الخطة').inputValue(),'late');assert.equal(await page.getByLabel('سورة الإنجاز').inputValue(),'112');assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'4');
+ assert.equal(await page.getByLabel('نوع التسميع').inputValue(),'late');assert.equal(await page.getByLabel('سورة الإنجاز').inputValue(),'112');assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'4');
  assert.equal(await page.getByLabel('ملاحظة لولي الأمر — اختياري').inputValue(),'مراجعة مواضع التردد'); await page.getByRole('button',{name:'متابعة من آخر إنجاز',exact:true}).click();
  assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'4');
  await page.getByLabel('البحث عن السورة',{exact:true}).fill('');await page.getByLabel('سورة الإنجاز').selectOption('67');await page.getByLabel('وصل إلى الآية').fill('5');
@@ -60,7 +60,7 @@ try{
  await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();await page.getByRole('button',{name:'أتم السورة كاملة',exact:true}).click();await page.locator('.grade-choice').nth(2).click();await page.getByRole('button',{name:'حفظ إنجاز الطالب وإشعار ولي الأمر',exact:true}).click();await page.getByText('تم الحفظ وإرسال ملخص التقييم لولي الأمر',{exact:true}).waitFor();assert.equal(evaluationRows.length,3);assert.ok(evaluation.client_key.startsWith('test-student|7|5|'));
  family=true;await page.clock.setFixedTime(new Date('2026-10-08T09:00:00Z'));await page.reload();
  await page.locator('.result-assignment').getByText('متأخر عن الخطة',{exact:true}).waitFor();
- assert.ok((await page.locator('.result-assignment').filter({hasText:'إنجاز الطالب'}).innerText()).includes('الإخلاص'));assert.equal(sends,0);
+ assert.ok((await page.locator('.result-assignment').filter({hasText:'ما سمّعه اليوم'}).innerText()).includes('الإخلاص'));assert.equal(sends,0);
  console.log('Reached checkpoint: bounds, retry isolation, history, edit, full-surah action and family wording passed');
 }finally{await browser.close()}
 
