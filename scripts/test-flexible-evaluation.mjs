@@ -28,7 +28,7 @@ await page.route('**/*.supabase.co/**',async route=>{
 await page.addInitScript(({teacher})=>{const encode=v=>btoa(JSON.stringify(v));const jwt=encode({alg:'HS256',typ:'JWT'})+'.'+encode({sub:teacher,exp:Math.floor(Date.now()/1000)+3600})+'.test';localStorage.setItem('sb-movfuflqgztlctdpbrbl-auth-token',JSON.stringify({access_token:jwt,refresh_token:'test-only',expires_at:Math.floor(Date.now()/1000)+3600,expires_in:3600,token_type:'bearer',user:{id:teacher,email:'test@login.gheras.local',aud:'authenticated',role:'authenticated',app_metadata:{},user_metadata:{}}}));},{teacher});
 try{
  await page.clock.setFixedTime(new Date('2026-10-08T09:00:00Z'));
- await page.goto('http://127.0.0.1:5174/');
+ await page.goto(process.env.TEST_BASE_URL||'http://127.0.0.1:5174/',{waitUntil:'domcontentloaded',timeout:60000});
  await page.getByLabel('وضع الطالب مع الخطة').waitFor();
  await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();
  assert.equal(await page.locator('.grade-choice').count(),0);
@@ -48,7 +48,14 @@ try{
  await page.reload();
  await page.getByRole('button',{name:'تعديل التقييم المحفوظ',exact:true}).click();
  assert.equal(await page.getByLabel('وضع الطالب مع الخطة').inputValue(),'late');assert.equal(await page.getByLabel('سورة الإنجاز').inputValue(),'112');assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'4');
- assert.equal(await page.getByLabel('ملاحظة لولي الأمر — اختياري').inputValue(),'مراجعة مواضع التردد');
+ assert.equal(await page.getByLabel('ملاحظة لولي الأمر — اختياري').inputValue(),'مراجعة مواضع التردد'); await page.getByRole('button',{name:'متابعة من آخر إنجاز',exact:true}).click();
+ assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'4');
+ await page.getByLabel('البحث عن السورة',{exact:true}).fill('');await page.getByLabel('سورة الإنجاز').selectOption('67');await page.getByLabel('وصل إلى الآية').fill('5');
+ await page.getByRole('button',{name:'+5 آيات',exact:true}).click();assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'10');
+ await page.getByRole('button',{name:'+10 آيات',exact:true}).click();assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'20');
+ await page.getByLabel('سورة الإنجاز').selectOption('112');await page.getByLabel('وصل إلى الآية').fill('3');await page.locator('.grade-choice').nth(2).click();
+ assert.equal(await page.getByRole('button',{name:'حفظ تعديل التقييم',exact:true}).isEnabled(),false);
+ await page.getByRole('checkbox',{name:/هذا أقل من الموضع السابق/}).check();assert.equal(await page.getByRole('button',{name:'حفظ تعديل التقييم',exact:true}).isEnabled(),true);
  await page.clock.setFixedTime(new Date('2026-10-09T09:00:00Z'));await page.reload();await page.getByLabel('تصفية حسب متابعة الخطة').selectOption('late');assert.equal(await page.locator('.evaluation-student-list button').count(),1);
  await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();await page.getByRole('button',{name:'أتم السورة كاملة',exact:true}).click();await page.locator('.grade-choice').nth(2).click();await page.getByRole('button',{name:'حفظ إنجاز الطالب وإشعار ولي الأمر',exact:true}).click();await page.getByText('تم الحفظ وإرسال ملخص التقييم لولي الأمر',{exact:true}).waitFor();assert.equal(evaluationRows.length,3);assert.ok(evaluation.client_key.startsWith('test-student|7|5|'));
  family=true;await page.clock.setFixedTime(new Date('2026-10-08T09:00:00Z'));await page.reload();
@@ -56,4 +63,6 @@ try{
  assert.ok((await page.locator('.result-assignment').filter({hasText:'إنجاز الطالب'}).innerText()).includes('الإخلاص'));assert.equal(sends,0);
  console.log('Reached checkpoint: bounds, retry isolation, history, edit, full-surah action and family wording passed');
 }finally{await browser.close()}
+
+
 

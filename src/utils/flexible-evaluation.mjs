@@ -1,3 +1,4 @@
+import {evaluationDate} from './report-period.mjs';
 export const progressLabels={plan:'حسب الخطة',late:'متأخر عن الخطة',alternative:'مقرر مختلف',ahead:'متقدم عن الخطة',review:'مراجعة وتثبيت'};
 export function flexibleNotes(mode,assignment,notes){return mode==='plan'?notes.trim():['متابعة الخطة: '+progressLabels[mode],'المقرر الفعلي: '+assignment,notes.trim()].filter(Boolean).join('\n')}
 export function readFlexibleNotes(notes=''){
@@ -12,5 +13,16 @@ export function parseReachedAssignment(assignment,surahs){
  if(!match)return null;const surah=surahs.find(s=>s.name===match[1]),ayah=Number(match[2]||match[3]);
  return surah&&reachedAssignment(surah,ayah)?{surahId:surah.id,ayah}:null;
 }
-export function achievementDescription(evaluation){const f=readFlexibleNotes(evaluation.notes);return f.mode==='plan'?'':[f.assignment,'ملاحظة: الطالب '+progressLabels[f.mode]].join('\n')}
+export function checkpointDetail(notes){return readFlexibleNotes(notes).notes.split('\n').find(line=>/^(الجديد في هذه المتابعة:|مراجعة وتثبيت عند الموضع|مراجعة عند موضع|موضع مسجل حتى الآية)/.test(line))||''}
+export function achievementDescription(evaluation){const f=readFlexibleNotes(evaluation.notes);return f.mode==='plan'?'':[f.assignment,checkpointDetail(evaluation.notes),'ملاحظة: الطالب '+progressLabels[f.mode]].filter(Boolean).join('\n')}
+export function latestCheckpoint(evaluations,surahs,{studentId,track,date,termStartDate,excludeId}={}){
+ const rows=evaluations.filter(e=>e.studentId===studentId&&(!excludeId||e.id!==excludeId)&&(e.track===track||e.track.startsWith(track+' · إنجاز فردي '))&&evaluationDate(e,termStartDate)<=date).sort((a,b)=>evaluationDate(b,termStartDate).localeCompare(evaluationDate(a,termStartDate))||b.createdAt.localeCompare(a.createdAt));
+ for(const e of rows){if(checkpointDetail(e.notes).startsWith('مراجعة'))continue;const point=parseReachedAssignment(readFlexibleNotes(e.notes).assignment,surahs);if(point)return {...point,date:evaluationDate(e,termStartDate),assignment:readFlexibleNotes(e.notes).assignment}}
+ return null;
+}
+export function checkpointChange(previous,surahId,ayah){
+ if(!previous||previous.surahId!==surahId)return 'موضع مسجل حتى الآية '+ayah+' من بداية السورة؛ لا يُفترض إنجاز سور أخرى.';
+ if(ayah>previous.ayah)return 'الجديد في هذه المتابعة: من الآية '+(previous.ayah+1)+' إلى الآية '+ayah+'.';
+ return ayah===previous.ayah?'مراجعة وتثبيت عند الموضع نفسه؛ لا يُحتسب تقدم جديد.':'مراجعة عند موضع سابق؛ لا يُحتسب تقدم جديد.';
+}
 
