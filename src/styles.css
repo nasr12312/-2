@@ -117,3 +117,6 @@ html[data-motion=reduced] *,html[data-motion=reduced] *:before,html[data-motion=
 
 .checkpoint-last{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:14px;border:1px solid var(--line);border-radius:12px;margin:12px 0}.checkpoint-last small{flex-basis:100%}.checkpoint-last b{flex:1;min-width:180px}.checkpoint-steps{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}.checkpoint-warning{display:flex;gap:10px;align-items:center;padding:14px;border:1px solid #d69e43;border-radius:10px;margin:12px 0}.checkpoint-growth{padding:12px;border-radius:10px;background:#b99a5012;margin-top:10px}.feedback-editor>summary{cursor:pointer;padding:12px 0}
 
+
+.multi-recitation-row{margin:12px 0;padding:14px;border:1px solid var(--line);border-radius:12px}.multi-recitation-row .toolbar .field{max-width:200px}.multi-recitation>small{display:block;margin-top:10px}
+

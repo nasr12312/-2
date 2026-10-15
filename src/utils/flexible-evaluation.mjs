@@ -1,9 +1,10 @@
+import {multiAssignmentText} from './multi-recitation.mjs';
 import {evaluationDate} from './report-period.mjs';
-export const progressLabels={plan:'حسب الخطة',late:'متأخر عن الخطة',alternative:'مقرر مختلف',ahead:'متقدم عن الخطة',review:'مراجعة وتثبيت'};
+export const progressLabels={plan:'حسب الخطة',late:'متأخر عن الخطة',alternative:'مقرر مختلف',ahead:'متقدم عن الخطة',review:'مراجعة وتثبيت',multi:'تسميع عدة سور أو مقاطع',multi_late:'متأخر عن الخطة • عدة سور أو مقاطع'};
 export function flexibleNotes(mode,assignment,notes){return mode==='plan'?notes.trim():['متابعة الخطة: '+progressLabels[mode],'المقرر الفعلي: '+assignment,notes.trim()].filter(Boolean).join('\n')}
 export function readFlexibleNotes(notes=''){
  const lines=notes.split('\n'),mode=Object.keys(progressLabels).find(k=>lines[0]==='متابعة الخطة: '+progressLabels[k]);
- return mode&&lines[1]?.startsWith('المقرر الفعلي: ')?{mode,assignment:lines[1].slice('المقرر الفعلي: '.length),notes:lines.slice(2).join('\n')}:{mode:'plan',assignment:'',notes};
+ return mode&&lines[1]?.startsWith('المقرر الفعلي: ')?{mode,assignment:multiAssignmentText(lines[1].slice('المقرر الفعلي: '.length))||lines[1].slice('المقرر الفعلي: '.length),notes:lines.slice(2).join('\n')}:{mode:'plan',assignment:'',notes};
 }
 export function normalizeQuranSearch(text){return text.replace(/[أإآ]/g,'ا').replace(/[ًٌٍَُِّْـ]/g,'').replace(/ى/g,'ي').trim()}
 export function displayEvaluationTrack(track){return track.replace(/ · إنجاز فردي .+$/,' • إنجاز فردي')}
@@ -25,4 +26,5 @@ export function checkpointChange(previous,surahId,ayah){
  if(ayah>previous.ayah)return 'الجديد في هذه المتابعة: من الآية '+(previous.ayah+1)+' إلى الآية '+ayah+'.';
  return ayah===previous.ayah?'مراجعة وتثبيت عند الموضع نفسه؛ لا يُحتسب تقدم جديد.':'مراجعة عند موضع سابق؛ لا يُحتسب تقدم جديد.';
 }
+
 
