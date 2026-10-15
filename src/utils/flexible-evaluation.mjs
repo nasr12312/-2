@@ -5,3 +5,4 @@ export function readFlexibleNotes(notes=''){
  return mode&&lines[1]?.startsWith('المقرر الفعلي: ')?{mode,assignment:lines[1].slice('المقرر الفعلي: '.length),notes:lines.slice(2).join('\n')}:{mode:'plan',assignment:'',notes};
 }
 export function normalizeQuranSearch(text){return text.replace(/[أإآ]/g,'ا').replace(/[ًٌٍَُِّْـ]/g,'').replace(/ى/g,'ي').trim()}
+export function displayEvaluationTrack(track){return track.replace(/ · إنجاز فردي .+$/,' • إنجاز فردي')}
