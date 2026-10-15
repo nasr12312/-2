@@ -111,3 +111,6 @@ html[data-motion=reduced] *,html[data-motion=reduced] *:before,html[data-motion=
 
 .flexible-surah-results{display:flex;flex-wrap:wrap;gap:8px;margin:10px 0}.flexible-evaluation .section-head{flex-wrap:wrap}.flexible-evaluation>p{margin:10px 0}
 
+
+.reach-preview{padding:16px;border:1px solid #b99a5066;border-radius:12px;margin:12px 0;background:#b99a5010}.reach-preview p{margin-top:7px}.achievement-description{white-space:pre-line;line-height:1.9}
+

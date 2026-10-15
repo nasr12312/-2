@@ -31,15 +31,13 @@ try{
  await page.goto('http://127.0.0.1:5174/');
  await page.getByLabel('وضع الطالب مع الخطة').waitFor();
  await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();
- await page.getByLabel('البحث عن سورة أو مقرر سابق').fill('الفاتحة');
- await page.getByRole('button',{name:'الأسبوع 7 • الخميس • الفاتحة كاملة',exact:true}).click();
- assert.equal(await page.getByLabel('المقرر الفعلي للطالب').inputValue(),'الفاتحة كاملة');
- await page.getByLabel('البحث عن سورة أو مقرر سابق').fill('');
- await page.getByLabel('سورة المقرر الفعلي').selectOption('112');
- await page.getByLabel('إلى الآية').fill('6');
  assert.equal(await page.locator('.grade-choice').count(),0);
- await page.getByLabel('إلى الآية').fill('4');
- assert.ok((await page.getByLabel('المقرر الفعلي للطالب').inputValue()).includes('الإخلاص'));
+ await page.getByLabel('البحث عن السورة',{exact:true}).fill('الإخلاص');
+ await page.getByLabel('سورة الإنجاز').selectOption('112');
+ await page.getByLabel('وصل إلى الآية').fill('6');
+ assert.equal(await page.locator('.grade-choice').count(),0);
+ await page.getByLabel('وصل إلى الآية').fill('4');
+ assert.ok((await page.locator('.reach-preview').innerText()).includes('وصل إلى الآية 4'));
  await page.locator('.grade-choice').nth(2).click();
  await page.getByLabel('ملاحظة لولي الأمر — اختياري').fill('مراجعة مواضع التردد');
  await page.getByRole('button',{name:'حفظ إنجاز الطالب وإشعار ولي الأمر',exact:true}).click();
@@ -49,13 +47,13 @@ try{
  assert.ok(evaluation.notes.includes('متأخر عن الخطة'));assert.ok(evaluation.notes.includes('الإخلاص'));assert.ok(evaluation.notes.includes('مراجعة مواضع التردد'));
  await page.reload();
  await page.getByRole('button',{name:'تعديل التقييم المحفوظ',exact:true}).click();
- assert.equal(await page.getByLabel('وضع الطالب مع الخطة').inputValue(),'late');assert.ok((await page.getByLabel('المقرر الفعلي للطالب').inputValue()).includes('الإخلاص'));
+ assert.equal(await page.getByLabel('وضع الطالب مع الخطة').inputValue(),'late');assert.equal(await page.getByLabel('سورة الإنجاز').inputValue(),'112');assert.equal(await page.getByLabel('وصل إلى الآية').inputValue(),'4');
  assert.equal(await page.getByLabel('ملاحظة لولي الأمر — اختياري').inputValue(),'مراجعة مواضع التردد');
  await page.clock.setFixedTime(new Date('2026-10-09T09:00:00Z'));await page.reload();await page.getByLabel('تصفية حسب متابعة الخطة').selectOption('late');assert.equal(await page.locator('.evaluation-student-list button').count(),1);
- await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();await page.locator('.grade-choice').nth(2).click();await page.getByRole('button',{name:'حفظ إنجاز الطالب وإشعار ولي الأمر',exact:true}).click();await page.getByText('تم الحفظ وإرسال ملخص التقييم لولي الأمر',{exact:true}).waitFor();assert.equal(evaluationRows.length,3);assert.ok(evaluation.client_key.startsWith('test-student|7|5|'));
+ await page.getByRole('button',{name:'إنجاز طالب متأخر',exact:true}).click();await page.getByRole('button',{name:'أتم السورة كاملة',exact:true}).click();await page.locator('.grade-choice').nth(2).click();await page.getByRole('button',{name:'حفظ إنجاز الطالب وإشعار ولي الأمر',exact:true}).click();await page.getByText('تم الحفظ وإرسال ملخص التقييم لولي الأمر',{exact:true}).waitFor();assert.equal(evaluationRows.length,3);assert.ok(evaluation.client_key.startsWith('test-student|7|5|'));
  family=true;await page.clock.setFixedTime(new Date('2026-10-08T09:00:00Z'));await page.reload();
  await page.locator('.result-assignment').getByText('متأخر عن الخطة',{exact:true}).waitFor();
- assert.ok((await page.locator('.result-assignment').filter({hasText:'المقرر الذي تم تقييمه'}).innerText()).includes('الإخلاص'));assert.equal(sends,0);
- console.log('Flexible evaluation: plan search, verse validation, persistence, editing and family display passed');
+ assert.ok((await page.locator('.result-assignment').filter({hasText:'إنجاز الطالب'}).innerText()).includes('الإخلاص'));assert.equal(sends,0);
+ console.log('Reached checkpoint: bounds, retry isolation, history, edit, full-surah action and family wording passed');
 }finally{await browser.close()}
 
