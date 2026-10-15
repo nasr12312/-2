@@ -15,7 +15,7 @@ test('latest checkpoint uses lesson date, excludes future lessons and other chil
  assert.match(checkpointChange({surahId:67,ayah:10},67,10),/لا يُحتسب تقدم/);
  assert.match(checkpointChange({surahId:67,ayah:10},67,5),/موضع سابق/);
  assert.match(checkpointChange({surahId:67,ayah:10},112,4),/لا يُفترض إنجاز سور أخرى/);
- assert.match(achievementDescription({...rows[1],notes:rows[1].notes+'\n'+checkpointChange({surahId:67,ayah:5},67,10)}),/6 إلى الآية 10/);
+ assert.match(achievementDescription({...rows[1],notes:rows[1].notes+'\n'+checkpointChange({surahId:67,ayah:5},67,10)}),/6–10/);
 });
 test('reached checkpoint rejects invalid verses and does not turn a middle passage into whole-surah progress',()=>{
  const surah={id:112,name:'الإخلاص',ayahs:4};
@@ -32,3 +32,4 @@ test('flexible evaluations retain actual assignment and progress separately from
  assert.deepEqual(readFlexibleNotes('ملاحظة قديمة'),{mode:'plan',assignment:'',notes:'ملاحظة قديمة'});
  assert.equal(flexibleNotes('plan','مقرر',' ملاحظة '),'ملاحظة');assert.equal(normalizeQuranSearch('الإِخْلَاص'),'الاخلاص');
 });
+

@@ -37,7 +37,7 @@ try{
  await page.getByLabel('وصل إلى الآية').fill('6');
  assert.equal(await page.locator('.grade-choice').count(),0);
  await page.getByLabel('وصل إلى الآية').fill('4');
- assert.ok((await page.locator('.reach-preview').innerText()).includes('وصل إلى الآية 4'));
+ assert.ok((await page.locator('.reach-preview').innerText()).includes('الإخلاص حتى الآية 4'));
  await page.locator('.grade-choice').nth(2).click();
  await page.getByLabel('ملاحظة لولي الأمر — اختياري').fill('مراجعة مواضع التردد');
  await page.getByRole('button',{name:'حفظ إنجاز الطالب وإشعار ولي الأمر',exact:true}).click();
@@ -63,6 +63,7 @@ try{
  assert.ok((await page.locator('.result-assignment').filter({hasText:'إنجاز الطالب'}).innerText()).includes('الإخلاص'));assert.equal(sends,0);
  console.log('Reached checkpoint: bounds, retry isolation, history, edit, full-surah action and family wording passed');
 }finally{await browser.close()}
+
 
 
 
