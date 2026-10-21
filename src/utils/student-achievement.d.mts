@@ -1,0 +1,10 @@
+export type AchievementSegment={surahId:number;from:number;to:number};
+export type AchievementData={version?:number;summary?:string;track:string;segments:AchievementSegment[];position?:{surahId:number;ayah:number}|null;note?:string};
+export function readAchievement(notes?:string):AchievementData|null;
+export function stripAchievement(notes?:string):string;
+export function validateAchievement(value:AchievementData,surahs:{id:number;name:string;ayahs:number}[]):boolean;
+export function heardVerseCount(segments:AchievementSegment[]):number;
+export function recordedSegments(text:string,surahs:{id:number;name:string;ayahs:number}[]):AchievementSegment[];
+export function achievementSummary(value:AchievementData,surahs:{id:number;name:string;ayahs:number}[]):string;
+export function achievementNotes(value:AchievementData,surahs:{id:number;name:string;ayahs:number}[]):string;
+export function lastAchievementPosition<T extends {id?:string;studentId:number;notes:string;createdAt:string}>(evaluations:T[],studentId:number,date:string,dateOf:(e:T)=>string,excludeId?:string):{record:AchievementData;evaluation:T}|null;

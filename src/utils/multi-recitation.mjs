@@ -1,3 +1,4 @@
+import {stripAchievement} from './student-achievement.mjs';
 const prefix='مقاطع التسميع: ';
 export function multiAssignment(segments,surahs){
  if(!segments.length||segments.length>20)return '';
@@ -8,5 +9,5 @@ export function multiAssignment(segments,surahs){
 export function parseMultiAssignment(value){try{if(!value.startsWith(prefix))return [];const rows=JSON.parse(value.slice(prefix.length));return Array.isArray(rows)&&rows.length<=20&&rows.every(r=>Number.isInteger(r.surahId)&&typeof r.surah==='string'&&Number.isInteger(r.from)&&Number.isInteger(r.to)&&r.from>=1&&r.to>=r.from&&typeof r.recommendation==='string')?rows:[]}catch{return []}}
 export function multiAssignmentText(value){return parseMultiAssignment(value).map((s,i)=>(i+1)+'. سورة '+s.surah+' • '+(s.complete?'السورة كاملة':'الآيات '+s.from+'–'+s.to)+(s.recommendation?'\nالتوصية: '+s.recommendation:'')).join('\n')}
 export function segmentsFromNotes(notes=''){return parseMultiAssignment(notes.split('\n')[1]?.replace(/^المقرر الفعلي: /,'')||'')}
-export function humanizeRecitationText(text=''){return String(text??'').replace(/المقرر الفعلي: (مقاطع التسميع: [^\n]+)/g,(_,value)=>'السور والمقاطع التي سُمّعت:\n'+(multiAssignmentText(value)||'يرجى مراجعة المعلم لتوضيح المقاطع.'))}
+export function humanizeRecitationText(text=''){return stripAchievement(text??'').replace(/المقرر الفعلي: (مقاطع التسميع: [^\n]+)/g,(_,value)=>'السور والمقاطع التي سُمّعت:\n'+(multiAssignmentText(value)||'يرجى مراجعة المعلم لتوضيح المقاطع.'))}
 
