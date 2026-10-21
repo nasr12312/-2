@@ -1,5 +1,5 @@
 export type AchievementSegment={surahId:number;from:number;to:number};
-export type AchievementData={version?:number;summary?:string;track:string;segments:AchievementSegment[];position?:{surahId:number;ayah:number}|null;note?:string};
+export type AchievementData={version?:number;kind?:'checkpoint';summary?:string;track:string;segments:AchievementSegment[];position?:{surahId:number;ayah:number}|null;note?:string};
 export function readAchievement(notes?:string):AchievementData|null;
 export function stripAchievement(notes?:string):string;
 export function validateAchievement(value:AchievementData,surahs:{id:number;name:string;ayahs:number}[]):boolean;
