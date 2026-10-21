@@ -5,7 +5,7 @@ export function preloadSchoolPage(page:string){
   achievement:()=>import('../pages/StudentAchievements'),quran:()=>import('../pages/StudentAchievements'),memorization:()=>import('../pages/StudentAchievements'),recitation:()=>import('../pages/StudentAchievements'),revision:()=>import('../pages/StudentAchievements'),
   messages:()=>import('../pages/SchoolCommunication'),parents:()=>import('../pages/FamilyFollowups'),
   students:()=>import('../pages/TeacherWorkspace'),management:()=>import('../pages/TeacherWorkspace'),
-  reports:()=>import('../pages/SchoolReports'),homework:()=>import('../pages/SchoolHomework'),
+  reportDelivery:()=>import('../pages/ReportDelivery'),reports:()=>import('../pages/SchoolReports'),homework:()=>import('../pages/SchoolHomework'),
   dashboard:()=>import('../pages/SchoolPages'),review:()=>import('../pages/SchoolPages'),plans:()=>import('../pages/SchoolPlans'),
   leaderboard:()=>import('../pages/SchoolPages'),notifications:()=>import('../pages/SchoolPages'),
   mushaf:()=>import('../pages/TeacherMushaf'),reader:()=>import('../pages/Maqraa'),certificates:()=>import('../pages/SchoolCertificates')

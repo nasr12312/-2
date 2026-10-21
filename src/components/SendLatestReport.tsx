@@ -1,3 +1,4 @@
+import {openPersonalWhatsApp} from '../services/personal-whatsapp';
 import {useEffect,useState} from 'react';
 import {useApp} from '../services/store';
 import {supabase} from '../services/supabase';
@@ -23,11 +24,11 @@ export default function SendLatestReport({studentId,name,onClose,onGenerate}:{st
  const message=report?fixedGuardianReportMessage({student:name,school:db.settings.school,teacher:user!.name,teacherPhone,title:report.title,generatedAt:report.created_at,sentAt:messageDate,reportUrl}):'';
  const url=whatsappReportUrl(phone,message);
  const log=async(status:'opened'|'teacher_confirmed_sent')=>{const r=await supabase!.from('guardian_report_handoffs').insert({student_id:studentId,teacher_id:user!.id,status});if(r.error){setError('تعذر حفظ حالة التواصل. لم يُسجّل تأكيد إرسال؛ أعد المحاولة.');return false}return true};
- const open=()=>{window.open(url,'_blank','noopener,noreferrer');setOpened(true);setConfirmed(false);setError('');void log('opened').catch(()=>setError('تعذر تسجيل فتح واتساب. يمكنك تأكيد الإرسال بعد إرساله فعليًا.'))};
+ const open=()=>{if(!openPersonalWhatsApp(phone,message)){notify('اسمح بفتح نافذة واتساب ثم أعد المحاولة');return}setOpened(true);setConfirmed(false);setError('');void log('opened').catch(()=>setError('تعذر تسجيل فتح واتساب. يمكنك تأكيد الإرسال بعد إرساله فعليًا.'))};
  const confirm=async()=>{if(!opened||busy||confirmed)return;setBusy(true);setError('');try{if(await log('teacher_confirmed_sent')){setConfirmed(true);notify('تم تسجيل تأكيد المعلم إرسال التقرير')}}catch{setError('تعذر حفظ التأكيد؛ أعد المحاولة.')}finally{setBusy(false)}};
  return <><Modal title={'إرسال آخر تقرير • '+name} onClose={()=>{if(!busy)onClose()}}>
   <p>افتح حسابك في واتساب، ثم افتح رسالة الطالب وأرسلها. بعد العودة اضغط تأكيد الإرسال.</p>
-  <a className="btn" href="https://web.whatsapp.com/" target="_blank" rel="noopener noreferrer">فتح حسابي / تسجيل الدخول في واتساب</a>
+  <Button onClick={()=>{if(!openPersonalWhatsApp())notify('اسمح بفتح واتساب في المتصفح')}}>فتح حسابي / تسجيل الدخول في واتساب</Button>
   {loading?<p>جارٍ تحميل آخر تقرير مولّد…</p>:<>
    <p>رقم ولي الأمر: <bdi>{phone||'لم يُضف رقم بعد'}</bdi></p><Button disabled={busy} onClick={()=>setEditContact(true)}>تعديل رقم ولي الأمر</Button>
    {!error&&report&&<><p>آخر تقرير مولّد: <b>{report.title}</b> • {new Date(report.created_at).toLocaleString('ar-SA',{timeZone:'Asia/Riyadh'})}</p><p>يُرسل هذا التقرير كما حُفظ وقت توليده. إذا أضفت تسميعًا أو ملاحظات بعده، اضغط «توليد / تحديث التقرير» أولًا.</p><Field label="الرسالة الثابتة مع اسم الطالب والتاريخ"><textarea readOnly rows={11} value={message}/></Field></>}
