@@ -1,0 +1,3 @@
+export function dailyEvaluationKey(teacher,classId,week,day,track){return [teacher,classId,week,day,track].join('|')}
+export function dailyPreset(value){return {entryId:typeof value?.entryId==='string'?value.entryId:'',...(typeof value?.assignment==='string'?{assignment:value.assignment.slice(0,2000)}:{}),oneClick:value?.oneClick!==false,autoNext:value?.autoNext!==false}}
+export function nextUnassessedStudent(roster,currentId,assessed){const start=roster.findIndex(s=>s.id===currentId);const ordered=[...roster.slice(start+1),...roster.slice(0,start)];return ordered.find(s=>!assessed(s))?.id??null}

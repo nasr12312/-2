@@ -1,0 +1,2 @@
+export function sharedReportId(search){const value=new URLSearchParams(search).get('report')||'';return /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value)?value:''}
+export function fullReportLink(base,location,id){if(!sharedReportId('?report='+id))throw Error('Invalid report id');const url=new URL(base,location);url.search='';url.hash='';url.searchParams.set('report',id);return url.href}
