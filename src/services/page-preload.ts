@@ -2,7 +2,7 @@
 const cached=new Map<string,Promise<unknown>>();
 export function preloadSchoolPage(page:string){
  const loaders:Record<string,()=>Promise<unknown>>={
-  achievement:()=>import('../pages/StudentAchievements'),quran:()=>import('../pages/SchoolQuran'),memorization:()=>import('../pages/SchoolQuran'),recitation:()=>import('../pages/SchoolQuran'),revision:()=>import('../pages/SchoolQuran'),
+  achievement:()=>import('../pages/QuickDailyEvaluation'),achievementDetail:()=>import('../pages/StudentAchievements'),quran:()=>import('../pages/QuickDailyEvaluation'),memorization:()=>import('../pages/QuickDailyEvaluation'),recitation:()=>import('../pages/QuickDailyEvaluation'),revision:()=>import('../pages/QuickDailyEvaluation'),
   messages:()=>import('../pages/SchoolCommunication'),parents:()=>import('../pages/FamilyFollowups'),
   students:()=>import('../pages/TeacherWorkspace'),management:()=>import('../pages/TeacherWorkspace'),
   reportDelivery:()=>import('../pages/ReportDelivery'),reports:()=>import('../pages/SchoolReports'),homework:()=>import('../pages/SchoolHomework'),
