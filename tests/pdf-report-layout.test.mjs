@@ -1,0 +1,4 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {pdfTextChunks,reportPdfName} from '../src/utils/pdf-report-layout.mjs';
+test('report PDF chunks preserve every Arabic character and line while bounding long teacher notes',()=>{for(const text of ['ملاحظة قصيرة',('ملاحظة المعلم على حفظ أحمد 😀\n').repeat(150),'س'.repeat(4000),'\n'.repeat(50)]){const parts=pdfTextChunks(text);assert.equal(parts.join(''),text);assert.ok(parts.every(p=>p.length<=650));assert.ok(parts.every(p=>!/[\uD800-\uDBFF]$/.test(p)));assert.ok(parts.every(p=>(p.match(/\n/g)||[]).length<=13))}});
+test('student PDF filename identifies the child and date and cannot create another path',()=>{assert.equal(reportPdfName('أحمد علي','2026-10-21'),'تقرير أحمد علي 2026-10-21.pdf');assert.ok(!/[\\/:*?"<>|]/.test(reportPdfName('../أحمد\\تقرير','2026-10-21')))});

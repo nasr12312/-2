@@ -18,6 +18,10 @@ test('fixed guardian message identifies student, teacher and report without conf
  assert.equal(new URL(whatsappReportUrl('0501234567',message)).searchParams.get('text'),message);
  assert.ok(!message.includes('تم الإرسال'));assert.ok(!message.includes('undefined'));
 });
+test('PDF attachment message opens independently without a platform URL or a parent-login instruction',()=>{
+ const message=fixedGuardianReportMessage({student:'أحمد',school:'غراس',teacher:'المعلم',title:'تقرير المتابعة',generatedAt:'2026-10-21T10:00:00Z',sentAt:'2026-10-21T10:00:00Z',attachment:true});
+ assert.ok(message.includes('PDF'));assert.ok(message.includes('أحمد'));assert.ok(!message.includes('https://'));assert.ok(!message.includes('يرجى الدخول'));assert.ok(!message.includes('undefined'));
+});
 test('report preserves and escapes editable academic and behavioral notes without including a login number',()=>{
  const html=studentReportDocument({name:'طالب',number:'1234567890',className:'ثاني متوسط'},'مدرسة','',{title:'تقرير',summary:'ملخص',recommendation:'متابعة',teacher:'معلم',showNumber:false,academicNotes:'<script>bad</script>',behavioralNotes:'انضباط جيد',records:[]});
  assert.ok(html.includes('ملاحظات أكاديمية'));assert.ok(html.includes('انضباط جيد'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('1234567890'));
