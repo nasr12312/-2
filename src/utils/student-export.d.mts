@@ -4,5 +4,5 @@ export function uniqueLoginCards(rows:ExportStudent[]):(ExportStudent&{classes:s
 export function loginCardMarkup(rows:ExportStudent[],school:string,logo:string):string;
 export function loginCardsDocument(rows:ExportStudent[],school:string,logo:string):string;
 export const cardStyles:string;
-export type StudentReportDraft={showNumber?:boolean;title:string;summary:string;recommendation:string;teacher:string;records:{date:string;track:string;grade:string;score:number|string;feedback:string}[]};
+export type StudentReportDraft={academicNotes?:string;behavioralNotes?:string;showNumber?:boolean;title:string;summary:string;recommendation:string;teacher:string;records:{date:string;track:string;grade:string;score:number|string;feedback:string}[]};
 export function studentReportDocument(student:ExportStudent,school:string,logo:string,draft:StudentReportDraft):string;

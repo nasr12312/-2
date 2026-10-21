@@ -2,13 +2,13 @@
 const cached=new Map<string,Promise<unknown>>();
 export function preloadSchoolPage(page:string){
  const loaders:Record<string,()=>Promise<unknown>>={
-  quran:()=>import('../pages/SchoolQuran'),memorization:()=>import('../pages/SchoolQuran'),recitation:()=>import('../pages/SchoolQuran'),
+  quran:()=>import('../pages/SchoolQuran'),memorization:()=>import('../pages/SchoolQuran'),recitation:()=>import('../pages/SchoolQuran'),revision:()=>import('../pages/SchoolQuran'),
   messages:()=>import('../pages/SchoolCommunication'),parents:()=>import('../pages/FamilyFollowups'),
   students:()=>import('../pages/TeacherWorkspace'),management:()=>import('../pages/TeacherWorkspace'),
   reports:()=>import('../pages/SchoolReports'),homework:()=>import('../pages/SchoolHomework'),
   dashboard:()=>import('../pages/SchoolPages'),review:()=>import('../pages/SchoolPages'),plans:()=>import('../pages/SchoolPlans'),
   leaderboard:()=>import('../pages/SchoolPages'),notifications:()=>import('../pages/SchoolPages'),
-  reader:()=>import('../pages/Maqraa'),certificates:()=>import('../pages/SchoolCertificates')
+  mushaf:()=>import('../pages/TeacherMushaf'),reader:()=>import('../pages/Maqraa'),certificates:()=>import('../pages/SchoolCertificates')
  };
  if(!cached.has(page)&&loaders[page])cached.set(page,loaders[page]().catch(()=>{cached.delete(page)}));
 }

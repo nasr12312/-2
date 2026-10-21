@@ -1,0 +1,34 @@
+begin;
+do $test$
+declare actor uuid; own_student text; other_student text; family uuid; blocked boolean;
+begin
+ select a.teacher_id,s.id into actor,own_student from public.teacher_class_assignments a join public.profiles p on p.user_id=a.teacher_id and p.role='teacher' and p.active join public.students s on s.class_id=a.class_id and s.active limit 1;
+ select s.id into other_student from public.students s where s.active and not exists(select 1 from public.teacher_class_assignments a where a.teacher_id=actor and a.class_id=s.class_id) limit 1;
+ select user_id into family from public.family_students where student_id=own_student limit 1;
+ if actor is null or other_student is null or family is null then raise exception 'Missing permission fixtures';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',actor,'role','authenticated')::text,true);
+ execute 'set local role authenticated';
+ insert into public.student_guardian_contacts(student_id,guardian_name,phone) values(own_student,'اختبار داخل معاملة','966500000000') on conflict(student_id) do update set guardian_name=excluded.guardian_name,phone=excluded.phone;
+ if not exists(select 1 from public.student_guardian_contacts where student_id=own_student) then raise exception 'Own contact unreadable';end if;
+ update public.student_guardian_contacts set resource_url='https://example.com/lesson' where student_id=own_student;
+ blocked:=false;begin insert into public.student_guardian_contacts(student_id) values(other_student);exception when insufficient_privilege then blocked:=true;end;
+ if not blocked then raise exception 'Teacher wrote another class contact';end if;
+ insert into public.guardian_report_handoffs(student_id,status) values(own_student,'opened');
+ blocked:=false;begin insert into public.guardian_report_handoffs(student_id,status) values(other_student,'teacher_confirmed_sent');exception when insufficient_privilege then blocked:=true;end;
+ if not blocked then raise exception 'Teacher wrote another class handoff';end if;
+ insert into public.student_report_drafts(student_id,teacher_id,title,academic_notes,behavioral_notes) values(own_student,actor,'اختبار','أكاديمي','سلوكي') on conflict(student_id,teacher_id) do update set academic_notes=excluded.academic_notes,behavioral_notes=excluded.behavioral_notes;
+ execute 'reset role';
+ insert into public.student_guardian_contacts(student_id) values(other_student) on conflict do nothing;
+ execute 'set local role authenticated';
+ if exists(select 1 from public.student_guardian_contacts where student_id=other_student) then raise exception 'Teacher read another class contact';end if;
+ perform set_config('request.jwt.claims',jsonb_build_object('sub',family,'role','authenticated')::text,true);
+ if exists(select 1 from public.student_guardian_contacts) then raise exception 'Contact directory exposed to parent';end if;
+ blocked:=false;begin insert into public.student_guardian_contacts(student_id) values(other_student);exception when insufficient_privilege then blocked:=true;end;
+ if not blocked then raise exception 'Parent wrote contact data';end if;
+ execute 'reset role';execute 'set local role anon';
+ blocked:=false;begin perform count(*) from public.student_guardian_contacts;exception when insufficient_privilege then blocked:=true;end;
+ if not blocked then raise exception 'Contact data exposed anonymously';end if;
+ execute 'reset role';
+end $test$;
+select 'PASS: assigned teacher read/write, cross-class denial, family and anonymous denial, editable report notes. All writes rolled back.' as result;
+rollback;

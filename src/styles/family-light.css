@@ -1,0 +1,29 @@
+/* Coordinated light palette with the school's green and restrained gold. */
+:root[data-mode=light]{color-scheme:light;--bg:#f3f7f5;--panel:#fff;--panel-strong:#edf5f0;--field:#fff;--text:#183e32;--muted:#536d61;--line:#d5e4db;--gold:#b49442;--gold-light:#806322;--shadow:0 8px 28px #224c3910;background:var(--bg);color:var(--text)}
+:root[data-mode=light] .sidebar{background:#e7f1eb;--text:#183e32;--muted:#4c6c5b;--line:#cbded1;--panel-strong:#dcece1;--field:#fff;color:var(--text);border-inline-end:1px solid var(--line)}
+:root[data-mode=light] .sidebar .nav-item{color:#355b48}
+:root[data-mode=light] .sidebar .nav-item.active{background:#cfe4d7;color:#174d36;border-color:#90bda1}
+:root[data-mode=light] .sidebar .sidebar-brand img{background:#1c503d;border-radius:12px;padding:8px}
+:root[data-mode=light] .topbar{background:#f8fbf9f5;border-color:var(--line)}
+:root[data-mode=light] .school-welcome,:root[data-mode=light] .home-school-banner{background:linear-gradient(120deg,#e1efe6,#f6faf7);color:var(--text);border-color:#cbded1}
+:root[data-mode=light] .school-welcome p,:root[data-mode=light] .home-school-banner p,:root[data-mode=light] .school-welcome .eyebrow{color:#456b56}
+:root[data-mode=light] .school-welcome img,:root[data-mode=light] .home-school-banner img{background:#1c503d;padding:10px;border-radius:14px}
+:root[data-mode=light] .evaluation-card,:root[data-mode=light] .evaluation-roster,:root[data-mode=light] .modal{background:#fff;color:var(--text)}
+:root[data-mode=light] .evaluation-student-list button.selected{background:#e3f0e8;border-color:#88b59a;color:#184a32}
+:root[data-mode=light] .segmented button.active,:root[data-mode=light] .grade-buttons button.selected{background:#e7efda;color:#496129;border-color:#a9bd82}
+:root[data-mode=light] input,:root[data-mode=light] select,:root[data-mode=light] textarea{background:#fff;color:#183e32;border-color:#c7dbcf}
+:root[data-mode=light] input::placeholder,:root[data-mode=light] textarea::placeholder{color:#708779}
+:root[data-mode=light] .school-shortcuts button,:root[data-mode=light] .assignment-block,:root[data-mode=light] .result-card{background:#f7faf8;color:var(--text);border-color:var(--line)}
+:root[data-mode=light] .sidebar-brand img,:root[data-mode=light] .school-welcome img,:root[data-mode=light] .home-school-banner img{mix-blend-mode:normal}
+:root[data-mode=light] .formal-login.login-refined{background:radial-gradient(ellipse at 10% 15%,#e0eee4,transparent 60%),#f3f7f4;color:#1a4935}
+:root[data-mode=light] .formal-login-title h1{color:#1a4935;text-shadow:none}
+:root[data-mode=light] .formal-login-title>p,:root[data-mode=light] .login-kicker,:root[data-mode=light] .formal-login footer{color:#526f5e}
+:root[data-mode=light] .login-services span{background:#fff;border-color:#d3e3d8;color:#345e47}
+:root[data-mode=light] .login-school-brand img{background:#1a4a36;padding:12px;border-radius:16px}
+:root[data-mode=light] .login-school-link{border-color:#bdcfc3;color:#28533d;background:#fff}
+:root[data-mode=light] .login-refined .formal-login-card{box-shadow:0 18px 50px #244f3515;border-color:#d3e2d8;border-top-color:#baa05d}
+:root[data-mode=light] .welcome-quran{background:linear-gradient(145deg,#fff,#eaf3ed);color:#244e38;border-color:#d0c59a;box-shadow:0 12px 30px #224c3910}
+:root[data-mode=light] .welcome-quran-top,:root[data-mode=light] .welcome-quran small{color:#715f2f}
+.guardian-communication,.latest-recitation{border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;background:var(--panel-strong)}
+.guardian-communication h3,.latest-recitation h3{margin-bottom:12px}.guardian-communication p,.latest-recitation p{margin:10px 0;overflow-wrap:anywhere}.guardian-communication ol{padding-inline-start:24px;line-height:2}.guardian-communication .btn{margin:6px}.latest-recitation>div{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.latest-recitation small{display:block}.latest-recitation .btn{margin-top:10px}
+@media(max-width:650px){.guardian-communication,.latest-recitation{padding:14px}.guardian-communication .btn{width:100%;margin:6px 0}.preferences-grid{grid-template-columns:1fr}}
