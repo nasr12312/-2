@@ -29,7 +29,7 @@ export async function studentReportPdf(html:string,name:string,date:string):Prom
   await doc.fonts.ready;
   const pdf=new jsPDF({orientation:'portrait',unit:'mm',format:'a4',compress:true});
   for(let i=0;i<sheets.length;i++){
-   const sheet=sheets[i];sheet.querySelectorAll('img').forEach(img=>{if(!img.src.startsWith('data:'))img.src=new URL(import.meta.env.BASE_URL+'gheras-logo.png',location.href).href});
+   const sheet=sheets[i];wrapper.replaceChildren(sheet);frame.contentWindow?.scrollTo(0,0);sheet.querySelectorAll('img').forEach(img=>{if(!img.src.startsWith('data:'))img.src=new URL(import.meta.env.BASE_URL+'gheras-logo.png',location.href).href});
    await Promise.all(Array.from(sheet.querySelectorAll('img')).map(img=>img.decode()));
    const number=doc.createElement('div');number.className='pdf-page-number';number.textContent=(i+1)+' / '+sheets.length;sheet.append(number);
    const canvas=await html2canvas(sheet,{scale:2,backgroundColor:'#ffffff',useCORS:true,logging:false,windowWidth:794,windowHeight:1123});if(i)pdf.addPage();pdf.addImage(canvas.toDataURL('image/jpeg',0.92),'JPEG',0,0,210,297,undefined,'FAST');canvas.width=0;canvas.height=0;
