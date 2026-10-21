@@ -27,3 +27,7 @@
 .guardian-communication,.latest-recitation{border:1px solid var(--line);border-radius:14px;padding:18px;margin:16px 0;background:var(--panel-strong)}
 .guardian-communication h3,.latest-recitation h3{margin-bottom:12px}.guardian-communication p,.latest-recitation p{margin:10px 0;overflow-wrap:anywhere}.guardian-communication ol{padding-inline-start:24px;line-height:2}.guardian-communication .btn{margin:6px}.latest-recitation>div{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}.latest-recitation small{display:block}.latest-recitation .btn{margin-top:10px}
 @media(max-width:650px){.guardian-communication,.latest-recitation{padding:14px}.guardian-communication .btn{width:100%;margin:6px 0}.preferences-grid{grid-template-columns:1fr}}
+
+/* Full-color school logo: preserve the supplied artwork in every theme. */
+.sidebar .sidebar-brand img,.login-logo,.school-welcome img,.home-school-banner img,.login-school-brand img{mix-blend-mode:normal;background:#fff;border-radius:12px}
+:root[data-mode=light] .sidebar .sidebar-brand img,:root[data-mode=light] .login-school-brand img{background:#fff}
