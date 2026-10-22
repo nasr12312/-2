@@ -1,0 +1,11 @@
+import type {QuranEvaluation,SchoolPlanEntry} from '../types';
+type Surah={id:number;name:string;ayahs:number};
+type Segment={surahId:number;from:number;to:number};
+export function mentionedSurahs(text:string,surahs:Surah[]):{surah:Surah;start:number;end:number}[];
+export function explicitRecitationSegments(text:string,surahs:Surah[]):Segment[];
+export function curriculumSurahs(entries:SchoolPlanEntry[],surahs:Surah[],scope:{track:string;week:number;day:number;extra?:string}):Surah[];
+export function searchSurahs<T extends Surah>(surahs:T[],query:string):T[];
+export function evaluationSegments(row:QuranEvaluation|undefined,surahs:Surah[]):Segment[];
+export function remainingRecitation(required:Segment[],heard:Segment[]):Segment[];
+export function recitationRangesText(rows:Segment[],surahs:Surah[]):string;
+export function teacherRecitationSummary(input:{records:QuranEvaluation[];studentId:number;track:string;date:string;dateOf:(row:QuranEvaluation)=>string;entries:SchoolPlanEntry[];week:number;day:number;assignment:string;draft:QuranEvaluation;surahs:Surah[]}):{today:Segment[];planned:Segment[];pendingToday:Segment[];pending:Segment[];previous:QuranEvaluation|null;savedToday:QuranEvaluation|null;todayText:string;pendingTodayText:string;pendingText:string;previousText:string;suggestedMode:string|null};
