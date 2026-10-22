@@ -1,3 +1,4 @@
+import {evaluationClientKey} from '../utils/evaluation-slot.mjs';
 import {sameRemoteEvaluation} from '../utils/confirmed-sync.mjs';
 import {isRecitationStatus} from '../utils/recitation-status.mjs';
 import {humanizeRecitationText} from '../utils/multi-recitation.mjs';
@@ -82,14 +83,15 @@ export async function uploadRemoteRecitation(file:File,studentRemoteId:string,as
 
 export async function syncRemoteEvaluations(before:Database,after:Database,userId:string){
  if(!supabase)return;
- const rows=[];const localKeys=new Map<string,string>();
+ let rows=[];const localKeys=new Map<string,string>();
  for(const [key,value] of Object.entries(after.evaluations)){
   if(JSON.stringify(before.evaluations[key])===JSON.stringify(value))continue;
   const student=after.students.find(item=>item.id===value.studentId);
   if(!student?.remoteId)throw new Error('تعذر تحديد الطالب لحفظ التقييم.');
-  localKeys.set(`${student.remoteId}|${value.weekId}|${value.day}|${value.track}`,key);
-  rows.push({client_key:`${student.remoteId}|${value.weekId}|${value.day}|${value.track}`,student_id:student.remoteId,grade:value.grade,score:value.scores[0]||null,scores:value.scores,notes:value.notes||'',written_feedback:value.writtenFeedback||'',encouragement:value.encouragement||'',next_step:value.nextStep||'',teacher_id:userId,evaluated_at:value.createdAt||new Date().toISOString()});
+  localKeys.set(evaluationClientKey(student.remoteId,value.weekId,value.day,value.track),key);
+  rows.push({client_key:evaluationClientKey(student.remoteId,value.weekId,value.day,value.track),student_id:student.remoteId,grade:value.grade,score:value.scores[0]||null,scores:value.scores,notes:value.notes||'',written_feedback:value.writtenFeedback||'',encouragement:value.encouragement||'',next_step:value.nextStep||'',teacher_id:userId,evaluated_at:value.createdAt||new Date().toISOString()});
  }
+ rows=[...new Map(rows.sort((a,b)=>Date.parse(a.evaluated_at)-Date.parse(b.evaluated_at)).map(row=>[row.client_key,row])).values()];
  if(rows.length){const existing=await supabase.from('evaluations').select('id,client_key,student_id,teacher_id,grade,score,scores,notes,written_feedback,encouragement,next_step,evaluated_at').in('client_key',rows.map(row=>row.client_key));if(existing.error)throw existing.error;const pending=rows.filter(row=>!sameRemoteEvaluation(existing.data?.find(saved=>saved.client_key===row.client_key),row));const confirmed:Array<{id:string;client_key:string}>=[...(existing.data||[])];if(pending.length){const {data,error}=await supabase.from('evaluations').upsert(pending,{onConflict:'client_key'}).select('id,client_key');if(error)throw error;if(!data||data.length!==pending.length)throw new Error('تعذر تأكيد حفظ جميع التقييمات.');confirmed.push(...data)}for(const row of confirmed){const local=localKeys.get(row.client_key);if(local)after.evaluations[local].id=row.id;}}
  for(const item of after.recitations){
   const previous=before.recitations.find(x=>x.id===item.id);
