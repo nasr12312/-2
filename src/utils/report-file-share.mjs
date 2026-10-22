@@ -1,3 +1,4 @@
+import {cleanReportFooter} from './report-presentation.mjs';
 import {reportPdfName} from './pdf-report-layout.mjs';
 
 export function reportHtmlFile(html,name,date){
@@ -5,7 +6,7 @@ export function reportHtmlFile(html,name,date){
  const meta=`<meta http-equiv="Content-Security-Policy" content="${policy}">`;
  // Place the policy before report content, retaining standards mode and UTF-8.
  const preamble='<meta charset="utf-8">'+meta;
- let source=String(html).replace(/<button\b[^>]*class="print-control"[^>]*>[\s\S]*?<\/button>/gi,'');
+ let source=cleanReportFooter(html).replace(/<button\b[^>]*class="print-control"[^>]*>[\s\S]*?<\/button>/gi,'');
  if(/<head\b[^>]*>/i.test(source))source=source.replace(/<head\b[^>]*>/i,tag=>tag+preamble);
  else if(/<html\b[^>]*>/i.test(source))source=source.replace(/<html\b[^>]*>/i,tag=>tag+preamble);
  else source='<!doctype html><html lang="ar" dir="rtl"><head>'+preamble+'</head><body>'+source+'</body></html>';

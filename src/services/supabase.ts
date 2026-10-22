@@ -1,3 +1,4 @@
+import {sessionFetch} from '../utils/session-fetch.mjs';
 import {deadlineFetch} from '../utils/request-deadline.mjs';
 import {evaluationClientKey} from '../utils/evaluation-slot.mjs';
 import {sameRemoteEvaluation} from '../utils/confirmed-sync.mjs';
@@ -13,7 +14,7 @@ import type {Database,Role,User} from '../types';
 const url=import.meta.env.VITE_SUPABASE_URL as string|undefined;
 const key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string|undefined;
 export const remoteEnabled=Boolean(url&&key&&!url.includes('YOUR_PROJECT'));
-export const supabase=remoteEnabled?createClient(url!,key!,{global:{fetch:deadlineFetch(fetch)},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+export const supabase=remoteEnabled?createClient(url!,key!,{global:{fetch:sessionFetch(deadlineFetch(fetch),url!,key!,()=>window.dispatchEvent(new Event('gheras-session-expired')))},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
 
 async function readClassPlans(){const rows:{class_id:string;plan_entry_id:string;assignment_text:string}[]=[];for(let start=0;;start+=1000){const r=await supabase!.from('class_plan_overrides').select('class_id,plan_entry_id,assignment_text').order('class_id').order('plan_entry_id').range(start,start+999);if(r.error)throw r.error;rows.push(...(r.data||[]));if((r.data||[]).length<1000)return rows;}}
 const emailFor=(code:string)=>`${code}@login.gheras.local`;

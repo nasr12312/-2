@@ -12,6 +12,7 @@ export function deadlineFetch(fetcher,timeoutMs=25000){return (input,init)=>with
 export function evaluationErrorMessage(error,action='الحفظ'){
  const code=error?.code||'',message=String(error?.message||'');
  if(code==='request_timeout'||/abort|timeout|timed out/i.test(message))return 'انتهت مهلة تأكيد '+action+'. بقيت بياناتك في البطاقة؛ حدّث السجل للتحقق ثم أعد المحاولة.';
+ if(code==='session_expired')return 'انتهت جلسة الدخول. سجّل الدخول مجددًا ثم أعد المحاولة.';
  if(code==='42501')return 'لا توجد صلاحية لهذا الإجراء على الطالب. حدّث شعبك أو تواصل مع المشرف.';
  if(code==='23505')return 'تعارض مع سجل محفوظ. حدّث السجل ثم عدّل تقييم اليوم نفسه.';
  if(code==='PGRST116')return 'لم يُعثر على السجل أو تعذر تأكيد الإجراء. حدّث قائمة التقييمات.';

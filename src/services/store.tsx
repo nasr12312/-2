@@ -6,7 +6,7 @@ import React,{createContext,useContext,useState,useEffect,useMemo,useRef} from '
 import {seed} from '../data/seed';
 import {visibleStudents} from '../utils/domain.mjs';
 import {saveMediaBlob} from './media';
-import {remoteEnabled,signInWithCode,signOutRemote,loadRemoteDatabase,saveTeacherClasses,uploadRemoteRecitation,syncRemoteEvaluations} from './supabase';
+import {supabase,remoteEnabled,signInWithCode,signOutRemote,loadRemoteDatabase,saveTeacherClasses,uploadRemoteRecitation,syncRemoteEvaluations} from './supabase';
 import type {Database,User,Permission,Student,RecitationSubmission} from '../types';
 const KEY='gheras-database-v1';
 export const uid=()=>crypto.randomUUID();
@@ -23,6 +23,7 @@ export function AppProvider({children}:{children:React.ReactNode}){
  const [userId,setUserId]=useState(()=>remoteEnabled?'':sessionStorage.getItem('gheras-user')||localStorage.getItem('gheras-user')||'');
  const [authLoading,setAuthLoading]=useState(remoteEnabled);
  const [setupNeeded,setSetupNeeded]=useState(false);
+ useEffect(()=>{if(!supabase)return;const expired=()=>{confirmed.current?.clear();setUserId('');setSetupNeeded(false);setAuthLoading(false);setToast('انتهت جلسة الدخول. سجّل الدخول مجددًا لمتابعة الحفظ والتقارير.');};const {data:{subscription}}=supabase.auth.onAuthStateChange((event,session)=>{if(event==='SIGNED_OUT'&&userId)expired();else if(session&&userId&&session.user.id!==userId)expired();});window.addEventListener('gheras-session-expired',expired);return()=>{subscription.unsubscribe();window.removeEventListener('gheras-session-expired',expired)}},[userId]);
  const user=db.users.find(u=>u.id===userId&&u.active)||null;
  const [page,setPage]=useState(()=>localStorage.getItem(`gheras-page-${userId}`)||'dashboard');
  const [studentId,selectStudent]=useState(1);

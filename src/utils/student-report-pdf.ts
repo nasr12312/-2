@@ -1,5 +1,7 @@
+import {cleanReportFooter} from './report-presentation.mjs';
 import {pdfTextChunks,reportPdfName} from './pdf-report-layout.mjs';
 export async function studentReportPdf(html:string,name:string,date:string):Promise<File>{
+ html=cleanReportFooter(html);
  const [{jsPDF},{default:html2canvas}]=await Promise.all([import('jspdf'),import('html2canvas')]);
  const frame=document.createElement('iframe');frame.title='تجهيز ملف تقرير الطالب';frame.setAttribute('sandbox','allow-same-origin');frame.setAttribute('aria-hidden','true');Object.assign(frame.style,{position:'fixed',left:'-12000px',top:'0',width:'794px',height:'1123px',border:'0'});
  try{
