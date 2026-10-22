@@ -1,0 +1,10 @@
+import type {QuranEvaluation,Student} from '../types';
+type Segment={surahId:number;from:number;to:number};
+export type ProgressSurah={surahId:number;name:string;total:number;heard:Segment[];pending:Segment[];heardCount:number;pendingCount:number;percent:number;complete:boolean;firstDate:string;lastDate:string;heardText:string;pendingText:string};
+export type ProgressEvent={evaluation:QuranEvaluation;date:string;segments:Segment[];text:string;kind:string};
+export type StudentProgress={studentId:number;track:string;until:string;history:QuranEvaluation[];timeline:ProgressEvent[];transitions:{date:string;fromSurahId:number;toSurahId:number;previousDate:string;heard:Segment[];pending:Segment[];text:string}[];surahs:ProgressSurah[];lastHeard:ProgressEvent|null;lastRecord:QuranEvaluation|null;position:{surahId:number;ayah:number;date:string}|null;uniqueVerses:number;completeCount:number;partialCount:number;unboundedCount:number;state:string};
+export function studentProgress(records:QuranEvaluation[],options:{studentId:number;track?:string;until?:string;termStartDate?:string;surahs?:{id:number;name:string;ayahs:number}[]}):StudentProgress;
+export function studentProgressReports(records:QuranEvaluation[],options:{studentIds:number[];until:string;termStartDate?:string;tracks?:string[];enrollmentLabels?:Record<number,string>}):(StudentProgress&{label:string})[];
+export function progressReportMarkup(groups?:(StudentProgress&{label?:string})[]):string;
+export function studentProgressCsv(rows:{student:Student;className:string;progress:StudentProgress}[]):string;
+export function matchesProgressActivity(progress:StudentProgress,activity:string,until:string):boolean;
