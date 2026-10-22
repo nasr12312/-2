@@ -1,0 +1,1 @@
+export function omitDeletedEvaluations(db,ids){if(!ids.size)return db;return {...db,evaluations:Object.fromEntries(Object.entries(db.evaluations).filter(([,e])=>!ids.has(e.id))),evaluationFollowups:db.evaluationFollowups?.filter(f=>!ids.has(f.evaluation_id))}}

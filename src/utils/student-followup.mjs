@@ -8,6 +8,7 @@ export function followupNotes(existing,{mode,assignment,note,assignmentChanged=f
  const priorSegments=segmentsFromNotes(existing);const preciseAssignment=!assignmentChanged&&priorSegments.length?multiAssignment(priorSegments,surahs):assignment.trim();
  return flexibleNotes(mode==='plan'?'today':mode,preciseAssignment||'لم يحدد المعلم مقرر التسميع',note);
 }
+export function followupPreview(existing,input,surahs){try{return {notes:followupNotes(existing,input,surahs),error:''}}catch{return {notes:'',error:'بيانات آيات هذا السجل تحتاج إلى تصحيح. حدّد التسميع الفعلي أو اكتبه قبل الحفظ.'}}}
 export function studentFollowupHistory(records,studentId,dateOf){
  const unique=new Map();for(const row of records){if(row.studentId!==studentId)continue;const key=row.id||[row.studentId,row.weekId,row.day,row.track].join('|');const old=unique.get(key);if(!old||Date.parse(row.createdAt)>=Date.parse(old.createdAt))unique.set(key,row)}
  return uniqueDailyEvaluations([...unique.values()],dateOf).sort((a,b)=>dateOf(b).localeCompare(dateOf(a))||Date.parse(b.createdAt)-Date.parse(a.createdAt));

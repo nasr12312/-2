@@ -1,3 +1,4 @@
+import {deadlineFetch} from '../utils/request-deadline.mjs';
 import {evaluationClientKey} from '../utils/evaluation-slot.mjs';
 import {sameRemoteEvaluation} from '../utils/confirmed-sync.mjs';
 import {isRecitationStatus} from '../utils/recitation-status.mjs';
@@ -12,7 +13,7 @@ import type {Database,Role,User} from '../types';
 const url=import.meta.env.VITE_SUPABASE_URL as string|undefined;
 const key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string|undefined;
 export const remoteEnabled=Boolean(url&&key&&!url.includes('YOUR_PROJECT'));
-export const supabase=remoteEnabled?createClient(url!,key!,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
+export const supabase=remoteEnabled?createClient(url!,key!,{global:{fetch:deadlineFetch(fetch)},auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:true}}):null;
 
 async function readClassPlans(){const rows:{class_id:string;plan_entry_id:string;assignment_text:string}[]=[];for(let start=0;;start+=1000){const r=await supabase!.from('class_plan_overrides').select('class_id,plan_entry_id,assignment_text').order('class_id').order('plan_entry_id').range(start,start+999);if(r.error)throw r.error;rows.push(...(r.data||[]));if((r.data||[]).length<1000)return rows;}}
 const emailFor=(code:string)=>`${code}@login.gheras.local`;
@@ -81,7 +82,7 @@ export async function saveTeacherClasses(classRemoteIds:string[]){
 
 export async function uploadRemoteRecitation(file:File,studentRemoteId:string,assignment:Record<string,string|number>,options:UploadOptions={}){if(!supabase)throw Error('قاعدة البيانات غير مهيأة.');return resumableRecitation(supabase,url!,file,studentRemoteId,assignment,options);}
 
-export async function syncRemoteEvaluations(before:Database,after:Database,userId:string){
+export async function syncRemoteEvaluations(before:Database,after:Database,userId:string,signal?:AbortSignal){
  if(!supabase)return;
  let rows=[];const localKeys=new Map<string,string>();
  for(const [key,value] of Object.entries(after.evaluations)){
@@ -92,11 +93,11 @@ export async function syncRemoteEvaluations(before:Database,after:Database,userI
   rows.push({client_key:evaluationClientKey(student.remoteId,value.weekId,value.day,value.track),student_id:student.remoteId,grade:value.grade,score:value.scores[0]||null,scores:value.scores,notes:value.notes||'',written_feedback:value.writtenFeedback||'',encouragement:value.encouragement||'',next_step:value.nextStep||'',teacher_id:userId,evaluated_at:value.createdAt||new Date().toISOString()});
  }
  rows=[...new Map(rows.sort((a,b)=>Date.parse(a.evaluated_at)-Date.parse(b.evaluated_at)).map(row=>[row.client_key,row])).values()];
- if(rows.length){const existing=await supabase.from('evaluations').select('id,client_key,student_id,teacher_id,grade,score,scores,notes,written_feedback,encouragement,next_step,evaluated_at').in('client_key',rows.map(row=>row.client_key));if(existing.error)throw existing.error;const pending=rows.filter(row=>!sameRemoteEvaluation(existing.data?.find(saved=>saved.client_key===row.client_key),row));const confirmed:Array<{id:string;client_key:string}>=[...(existing.data||[])];if(pending.length){const {data,error}=await supabase.from('evaluations').upsert(pending,{onConflict:'client_key'}).select('id,client_key');if(error)throw error;if(!data||data.length!==pending.length)throw new Error('تعذر تأكيد حفظ جميع التقييمات.');confirmed.push(...data)}for(const row of confirmed){const local=localKeys.get(row.client_key);if(local)after.evaluations[local].id=row.id;}}
+ if(rows.length){const existing=await supabase.from('evaluations').select('id,client_key,student_id,teacher_id,grade,score,scores,notes,written_feedback,encouragement,next_step,evaluated_at').in('client_key',rows.map(row=>row.client_key)).abortSignal(signal||new AbortController().signal);if(existing.error)throw existing.error;const pending=rows.filter(row=>!sameRemoteEvaluation(existing.data?.find(saved=>saved.client_key===row.client_key),row));const confirmed:Array<{id:string;client_key:string}>=[...(existing.data||[])];if(pending.length){const {data,error}=await supabase.from('evaluations').upsert(pending,{onConflict:'client_key'}).abortSignal(signal||new AbortController().signal).select('id,client_key');if(error)throw error;if(!data||data.length!==pending.length)throw new Error('تعذر تأكيد حفظ جميع التقييمات.');confirmed.push(...data)}for(const row of confirmed){const local=localKeys.get(row.client_key);if(local)after.evaluations[local].id=row.id;}}
  for(const item of after.recitations){
   const previous=before.recitations.find(x=>x.id===item.id);
   if(!previous||JSON.stringify(previous)===JSON.stringify(item))continue;
-  const {error}=await supabase.from('recitation_submissions').update({status:item.status,grade:item.grade,teacher_notes:item.teacherNotes,evaluated_by:userId,evaluated_at:item.evaluatedAt}).eq('id',item.id).select('id').single();if(error)throw error;
+  const {error}=await supabase.from('recitation_submissions').update({status:item.status,grade:item.grade,teacher_notes:item.teacherNotes,evaluated_by:userId,evaluated_at:item.evaluatedAt}).eq('id',item.id).abortSignal(signal||new AbortController().signal).select('id').single();if(error)throw error;
  }
 }
 
