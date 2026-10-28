@@ -24,7 +24,7 @@ test('PDF attachment message opens independently without a platform URL or a par
 });
 test('compact report escapes academic notes and omits behavioral extras and login numbers',()=>{
  const html=studentReportDocument({name:'طالب',number:'1234567890',className:'ثاني متوسط'},'مدرسة','',{title:'تقرير',summary:'ملخص',recommendation:'متابعة',teacher:'معلم',showNumber:false,academicNotes:'<script>bad</script>',behavioralNotes:'انضباط جيد',records:[]});
- assert.ok(html.includes('ما يحتاج إلى مراجعة أو تثبيت'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('انضباط جيد'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('1234567890'));
+ assert.ok(html.includes('ملاحظة:'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('انضباط جيد'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('1234567890'));
  const message=guardianMessage({student:'طالب',school:'مدرسة',title:'تقرير',summary:'ملخص',academic:'تثبيت الحفظ',behavioral:'انضباط',recommendation:'مراجعة',records:Array.from({length:12},(_,i)=>({date:String(i),track:'المراجعة',grade:'جيد',feedback:'آيات'}))});assert.equal((message.match(/المراجعة/g)||[]).length,8);assert.ok(!message.includes('مرفق'));
 });
 test('review grades and daily statuses do not replace memorization grades in reports',()=>{
