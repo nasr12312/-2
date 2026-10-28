@@ -1,5 +1,5 @@
 import {reportEvaluations} from './report-evaluations.mjs';
-import {studentReportRecord} from './student-report-record.mjs';
+import {studentReportRecord,studentReportPlan} from './student-report-record.mjs';
 import {reportPeriod,evaluationDate} from './report-period.mjs';
 import {calendarFocus} from './school-calendar.mjs';
 import {studentReportDocument} from './student-export.mjs';
@@ -14,14 +14,14 @@ export function weeklyStudentReports(students,evaluations,options){
   const actual=reportEvaluations(evaluations,options.termStartDate).filter(e=>ids.has(e.studentId)&&dates.get(e)>=bounds.from&&dates.get(e)<=bounds.to).sort((a,b)=>dates.get(a).localeCompare(dates.get(b))||a.track.localeCompare(b.track,'ar'));
   const records=actual.map(e=>{
    const s=group.find(s=>s.id===e.studentId),c=options.classes.find(c=>c.id===s.classId);
-   const plan=options.plans?.find(p=>p.id===e.planEntryId&&p.classId===c?.remoteId)||options.plans?.find(p=>p.id===e.planEntryId&&!p.classId);
+   const plan=studentReportPlan(e,options.plans,c);
    return studentReportRecord(e,{date:dates.get(e),plan,includeNotes:options.includeNotes!==false,enrollment:group.length>1?className(s):''});
   });
   const week=calendarFocus(options.termStartDate,bounds.from);
   const base=reportFileName(first.name)+' - التقييم الأسبوعي '+bounds.from;let name=base+'.html',counter=2;
   while(usedNames.has(name.toLocaleLowerCase())){name=base+' ('+counter+').html';counter++}usedNames.add(name.toLocaleLowerCase());
   const title='التقرير الأسبوعي لتسميع القرآن الكريم';
-  const messageText=[title,'الطالب: '+first.name,'الفترة: '+bounds.from+' — '+bounds.to,...records.map(r=>[r.date,r.enrollment,r.track,r.grade,r.assignment].filter(Boolean).join(' • ')),records.length?'':'لا يوجد تقييم محفوظ لهذا الأسبوع.','اضغط «فتح التقرير الأسبوعي الكامل» للاطلاع على التقرير.'].filter(Boolean).join('\n');
+  const messageText=[title,'الطالب: '+first.name,'الفترة: '+bounds.from+' — '+bounds.to,...records.map(r=>[r.date,r.enrollment,r.track,'المطلوب: '+(r.required||'غير مسجّل'),'وصل: '+(r.reached||'غير مسجّل'),r.simpleNote].filter(Boolean).join(' • ')),records.length?'':'لا يوجد تقييم محفوظ لهذا الأسبوع.','اضغط «فتح التقرير الأسبوعي الكامل» للاطلاع على التقرير.'].filter(Boolean).join('\n');
   return {name,studentName:first.name,studentIds:group.map(s=>s.id),messageText:messageText.length>3900?messageText.slice(0,3700)+'\nالتفاصيل في التقرير الأسبوعي المرفق.':messageText,content:studentReportDocument({name:first.name,number:'',className:group.map(className).join(' / ')},options.school,options.logo,{title,summary:'',recommendation:'',teacher:options.teacher,showNumber:false,fromDate:bounds.from,toDate:bounds.to,weekLabel:week.inTerm?'الأسبوع '+week.week:week.phase,records})};
  });
 }
