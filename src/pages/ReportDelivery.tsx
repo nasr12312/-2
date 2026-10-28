@@ -1,10 +1,8 @@
 import {reportReadiness} from '../utils/report-readiness.mjs';
 import ReportHtmlShare from '../components/ReportHtmlShare';
-import {studentProgressReports} from '../utils/student-progress.mjs';
+import {studentReportRecord} from '../utils/student-report-record.mjs';
 import {studentReportPdf,downloadReportPdf} from '../utils/student-report-pdf';
 import {riyadhDate} from '../utils/school-calendar.mjs';
-import {numericEvaluationScore,isRecitationStatus,recitationStatusLabel} from '../utils/recitation-status.mjs';
-import {achievementDescription,readFlexibleNotes,displayEvaluationTrack} from '../utils/flexible-evaluation.mjs';
 import {evaluationDate} from '../utils/report-period.mjs';
 import {studentReportDocument} from '../utils/student-export.mjs';
 import {useEffect,useState} from 'react';
@@ -46,9 +44,9 @@ export default function ReportDelivery(){
     const student=students.find(s=>s.remoteId===id);if(!student)throw Error();
     const d=await supabase!.from('student_report_drafts').select('title,summary,recommendation,academic_notes,behavioral_notes').eq('student_id',id).eq('teacher_id',user!.id).maybeSingle();if(d.error)throw d.error;
     const draft=d.data;
-    const records=Object.values(db.evaluations).filter(e=>e.studentId===student.id).sort((a,b)=>evaluationDate(b,db.settings.termStartDate).localeCompare(evaluationDate(a,db.settings.termStartDate))||b.createdAt.localeCompare(a.createdAt)).map(e=>({date:evaluationDate(e,db.settings.termStartDate),track:displayEvaluationTrack(e.track),grade:recitationStatusLabel(e.grade),score:numericEvaluationScore(e)??'—',feedback:isRecitationStatus(e)?recitationStatusLabel(e.grade):[achievementDescription(e)||db.schoolPlans?.find(p=>p.id===e.planEntryId)?.text,e.writtenFeedback,readFlexibleNotes(e.notes).notes,e.nextStep].filter((v,i,items)=>v&&items.indexOf(v)===i).join('\n')}));
+    const records=Object.values(db.evaluations).filter(e=>e.studentId===student.id).sort((a,b)=>evaluationDate(b,db.settings.termStartDate).localeCompare(evaluationDate(a,db.settings.termStartDate))||b.createdAt.localeCompare(a.createdAt)).map(e=>studentReportRecord(e,{date:evaluationDate(e,db.settings.termStartDate),plan:db.schoolPlans?.find(p=>p.id===e.planEntryId)}));
     const title=draft?.title?.trim()||'تقرير متابعة الطالب';
-    const html=studentReportDocument({name,number:student.academicId,program:student.program||'',className:db.classes.find(c=>c.id===student.classId)?.name||''},db.settings.school,db.settings.logo,{title,summary:draft?.summary||'',recommendation:draft?.recommendation||'',academicNotes:draft?.academic_notes||'',behavioralNotes:draft?.behavioral_notes||'',teacher:user!.name,showNumber:false,periodLabel:'كل السجل • كل المسارات',progress:studentProgressReports(Object.values(db.evaluations),{studentIds:[student.id],until:riyadhDate(),termStartDate:db.settings.termStartDate}),records});
+    const html=studentReportDocument({name,number:student.academicId,program:student.program||'',className:db.classes.find(c=>c.id===student.classId)?.name||''},db.settings.school,db.settings.logo,{title,summary:draft?.summary||'',recommendation:draft?.recommendation||'',academicNotes:draft?.academic_notes||'',behavioralNotes:draft?.behavioral_notes||'',teacher:user!.name,showNumber:false,periodLabel:'كل السجل • كل المسارات',records});
     reportHtml=html;const result=await supabase!.from('shared_student_reports').insert({student_id:id,teacher_id:user!.id,title,html}).select('id,student_id,title,created_at').single();if(result.error||!result.data)throw result.error||Error();report=result.data;setReports(v=>({...v,[id]:report}));
    }
    if(!reportHtml){const r=await supabase!.from('shared_student_reports').select('html').eq('id',report.id).eq('student_id',id).eq('teacher_id',user!.id).single();if(r.error||!r.data)throw r.error||Error();reportHtml=r.data.html}
@@ -69,3 +67,4 @@ export default function ReportDelivery(){
  {selectedReport?.remoteId&&<StudentReport studentId={selectedReport.remoteId} student={{name:selectedReport.name,number:selectedReport.academicId,program:selectedReport.program||'',className:db.classes.find(c=>c.id===selectedReport.classId)?.name||''}} onClose={()=>{setReportStudent(0);void load()}}/>}
  {preview&&<Modal title={'رسالة ولي أمر • '+preview.name} onClose={()=>setPreview(null)}><Field label="نص الرسالة"><textarea readOnly rows={12} value={preview.message}/></Field></Modal>}</>;
 }
+

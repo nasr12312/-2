@@ -22,11 +22,12 @@ test('PDF attachment message opens independently without a platform URL or a par
  const message=fixedGuardianReportMessage({student:'أحمد',school:'غراس',teacher:'المعلم',title:'تقرير المتابعة',generatedAt:'2026-10-21T10:00:00Z',sentAt:'2026-10-21T10:00:00Z',attachment:true});
  assert.ok(message.includes('PDF'));assert.ok(message.includes('أحمد'));assert.ok(!message.includes('https://'));assert.ok(!message.includes('يرجى الدخول'));assert.ok(!message.includes('undefined'));
 });
-test('report preserves and escapes editable academic and behavioral notes without including a login number',()=>{
+test('compact report escapes academic notes and omits behavioral extras and login numbers',()=>{
  const html=studentReportDocument({name:'طالب',number:'1234567890',className:'ثاني متوسط'},'مدرسة','',{title:'تقرير',summary:'ملخص',recommendation:'متابعة',teacher:'معلم',showNumber:false,academicNotes:'<script>bad</script>',behavioralNotes:'انضباط جيد',records:[]});
- assert.ok(html.includes('ملاحظات أكاديمية'));assert.ok(html.includes('انضباط جيد'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('1234567890'));
+ assert.ok(html.includes('ما يحتاج إلى مراجعة أو تثبيت'));assert.ok(html.includes('&lt;script&gt;'));assert.ok(!html.includes('انضباط جيد'));assert.ok(!html.includes('<script>'));assert.ok(!html.includes('1234567890'));
  const message=guardianMessage({student:'طالب',school:'مدرسة',title:'تقرير',summary:'ملخص',academic:'تثبيت الحفظ',behavioral:'انضباط',recommendation:'مراجعة',records:Array.from({length:12},(_,i)=>({date:String(i),track:'المراجعة',grade:'جيد',feedback:'آيات'}))});assert.equal((message.match(/المراجعة/g)||[]).length,8);assert.ok(!message.includes('مرفق'));
 });
 test('review grades and daily statuses do not replace memorization grades in reports',()=>{
  const make=(track,grade)=>({studentId:1,weekId:1,day:0,track,grade,createdAt:'2026-08-23T08:00:00Z'});const rows=reportEvaluations([make('الحفظ','متفوق'),make('المراجعة','جيد')],'2026-08-23');assert.equal(rows.length,2);assert.ok(rows.some(e=>e.track==='المراجعة'));
 });
+
