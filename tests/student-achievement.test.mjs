@@ -15,7 +15,7 @@ test('professional report separates track averages, excludes ungraded entries, a
  const make=(date,track,score)=>({date,track,score,grade:'تقدير',feedback:'ملاحظة <خاصة>'});
  const records=[make('2026-10-19','الحفظ • إنجاز فردي',5),make('2026-10-20','المراجعة',1),make('2026-10-21','الحفظ • إنجاز فردي','—'),make('2026-10-18','الحفظ',3)];
  const h=reportHighlights(records);assert.equal(h.latest.date,'2026-10-21');assert.equal(h.tracks[0].average,'4.0');assert.equal(h.tracks[0].count,3);assert.equal(h.tracks[0].scored,2);assert.equal(h.tracks[1].average,null);assert.equal(h.tracks[2].average,'1.0');
- const html=studentReportDocument({name:'طالب',className:'ثاني متوسط',number:'secret'},'غراس','',{title:'التقرير',periodLabel:'أسبوع محدد',summary:'',recommendation:'',teacher:'المعلم',showNumber:false,records});assert.match(html,/آخر متابعة في نطاق التقرير/);assert.match(html,/أسبوع محدد/);assert.match(html,/4.0 \/ 5/);assert.ok(!html.includes('secret'));assert.ok(!html.includes('ملاحظة <خاصة>'));assert.ok(html.includes('ملاحظة &lt;خاصة&gt;'));
+ const html=studentReportDocument({name:'طالب',className:'ثاني متوسط',number:'secret'},'غراس','',{title:'التقرير',periodLabel:'أسبوع محدد',summary:'',recommendation:'',teacher:'المعلم',showNumber:false,records});assert.ok(!html.includes('آخر متابعة في نطاق التقرير'));assert.match(html,/المقرر المُسمّع/);assert.match(html,/أسبوع محدد/);assert.ok(!html.includes('4.0 / 5'));assert.ok(!html.includes('secret'));assert.ok(!html.includes('ملاحظة <خاصة>'));assert.ok(html.includes('ملاحظة &lt;خاصة&gt;'));
 });
 test('legacy edits restore explicit ranges but never reinterpret a reached position or an unspecified plan as actual recitation',()=>{
  assert.deepEqual(recordedSegments('سورة الملك • من الآية 12 إلى الآية 15',surahs),draft.segments);assert.deepEqual(recordedSegments('سورة الملك • الآيات 12–15',surahs),draft.segments);assert.deepEqual(recordedSegments('سورة الملك • وصل إلى الآية 15 (من بداية السورة)',surahs),[]);assert.deepEqual(recordedSegments('مقرر سورة الملك',surahs),[]);
@@ -34,5 +34,6 @@ test('editing an old record does not override a later lesson; review does not mo
 test('weekly report automatically includes actual achievement and teacher note; ungraded progress has no invented average',()=>{
  const e={id:'e',studentId:1,weekId:8,day:2,track:'الحفظ · إنجاز فردي e',grade:'إنجاز مسجل دون درجة',scores:[],notes:achievementNotes(draft,surahs),createdAt:'2026-10-13T09:00:00Z'};
  const report=weeklyStudentReports([{id:1,name:'طالب',academicId:'1000000000',classId:1}],[e],{date:'2026-10-13',termStartDate:'2026-08-23',classes:[{id:1,name:'ثاني متوسط'}],school:'غراس',logo:'',teacher:'المعلم'})[0];
- assert.match(report.content,/12–15/);assert.match(report.content,/ملاحظة المعلم/);assert.match(report.content,/لا توجد درجات مسجلة/);assert.ok(!report.content.includes('سجل الإنجاز:'));
+ assert.match(report.content,/12–15/);assert.match(report.content,/ملاحظة المعلم/);assert.match(report.content,/إنجاز مسجل دون درجة/);assert.ok(!report.content.includes('/ 5'));assert.ok(!report.content.includes('سجل الإنجاز:'));
 });
+

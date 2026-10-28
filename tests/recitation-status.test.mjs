@@ -7,7 +7,7 @@ test('non-recitation statuses never become a score or dilute graded performance'
  const all=[{...base,grade:'متفوق',scores:[5]},...recitationStatuses.map((grade,i)=>({...base,day:i+1,track:'الحفظ · حالة يومية',grade,scores:[]}))];
  for(const e of all.slice(1))assert.equal(numericEvaluationScore({...e,scores:[0]}),null);
  const [report]=weeklyStudentReports([{id:1,name:'طالب',academicId:'1000000000',classId:1}],all,{date:'2026-10-08',termStartDate:'2026-08-23',classes:[{id:1,name:'أ'}],school:'غراس',logo:'',teacher:'المعلم'});
- assert.ok(report.content.includes('5.0 / 5'));for(const label of recitationStatuses)assert.ok(report.content.includes(recitationStatusLabel(label)));assert.ok(!report.messageText.includes('undefined'));assert.ok(!report.messageText.includes('(0/5)'));
+ assert.ok(report.content.includes('متفوق'));assert.ok(!report.content.includes('متوسط'));for(const label of recitationStatuses)assert.ok(report.content.includes(recitationStatusLabel(label)));assert.ok(!report.messageText.includes('undefined'));assert.ok(!report.messageText.includes('(0/5)'));
 });
 test('class status skips graded students, repeated status and duplicate enrollment IDs',()=>{
  const students=[{id:1,remoteId:'a'},{id:2,remoteId:'b'},{id:3,remoteId:'c'},{id:4,remoteId:'d'},{id:5},{id:6,remoteId:'d'}];
@@ -24,3 +24,4 @@ test('today recitation is a frozen achievement and absence never includes a plan
  const [report]=weeklyStudentReports([{id:1,name:'طالب',academicId:'1000000000',classId:1}],[{studentId:1,weekId:7,day:4,track:'الحفظ · حالة يومية',grade:'غائب اليوم',scores:[],notes:'ملاحظة قديمة لا تعرض',nextStep:'توجيه قديم لا يعرض',planEntryId:'p',createdAt:'2026-10-08T08:00:00Z'}],{date:'2026-10-08',termStartDate:'2026-08-23',classes:[{id:1,name:'أ'}],plans:[{id:'p',text:'خطة لا تعرض'}],school:'غراس',logo:'',teacher:'المعلم'});
  for(const text of ['ملاحظة قديمة لا تعرض','توجيه قديم لا يعرض','خطة لا تعرض'])assert.ok(!report.content.includes(text),text);assert.ok(report.content.includes('غائب'));
 });
+

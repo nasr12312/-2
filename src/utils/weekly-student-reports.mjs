@@ -1,30 +1,27 @@
-import {studentProgressReports} from './student-progress.mjs';
 import {reportEvaluations} from './report-evaluations.mjs';
-import {numericEvaluationScore,isRecitationStatus,recitationStatusLabel} from './recitation-status.mjs';
-import {readFlexibleNotes,displayEvaluationTrack,achievementDescription} from './flexible-evaluation.mjs';
-import {reportPeriod,evaluationDate,schoolDateLabel} from './report-period.mjs';
-import {calendarFocus,isFollowed,riyadhDate} from './school-calendar.mjs';
+import {studentReportRecord} from './student-report-record.mjs';
+import {reportPeriod,evaluationDate} from './report-period.mjs';
+import {calendarFocus} from './school-calendar.mjs';
 import {studentReportDocument} from './student-export.mjs';
 import {reportFileName} from './report-zip.mjs';
 export function weeklyStudentReports(students,evaluations,options){
- const bounds=reportPeriod(options.date,'week'),groups=new Map(),usedNames=new Set();const dates=new Map(evaluations.map(e=>[e,evaluationDate(e,options.termStartDate)]));const labels=new Map();const dateLabel=date=>{if(!labels.has(date))labels.set(date,schoolDateLabel(date));return labels.get(date)};
+ const bounds=reportPeriod(options.date,'week'),groups=new Map(),usedNames=new Set();
+ const dates=new Map(evaluations.map(e=>[e,evaluationDate(e,options.termStartDate)]));
  for(const s of students){const key=/^\d{10}$/.test(s.academicId)?s.academicId:'student:'+s.id;if(!groups.has(key))groups.set(key,[]);groups.get(key).push(s)}
  return [...groups.values()].sort((a,b)=>a[0].name.localeCompare(b[0].name,'ar')).map(group=>{
- const first=group[0],ids=new Set(group.map(s=>s.id));const className=s=>{const c=options.classes.find(c=>c.id===s.classId);const name=c?.name||'الشعبة';return /الدبلوم[اة]|ثنائي/.test(name)?name:(s.program==='diploma'?'الدبلوما':'ثنائي اللغة')+' • '+name};
- const actual=reportEvaluations(evaluations,options.termStartDate).filter(e=>ids.has(e.studentId)&&dates.get(e)>=bounds.from&&dates.get(e)<=bounds.to).sort((a,b)=>dates.get(a).localeCompare(dates.get(b))||a.track.localeCompare(b.track,'ar'));
- const scored=actual.filter(e=>numericEvaluationScore(e)!==null);const average=scored.length?(scored.reduce((sum,e)=>sum+e.scores[0],0)/scored.length).toFixed(1)+' / 5':actual.length?'لا توجد درجات مسجلة':'لا يوجد تقييم محفوظ';
- const records=[];
- for(let day=0;day<7;day++){const current=new Date(bounds.from+'T12:00:00Z');current.setUTCDate(current.getUTCDate()+day);const date=current.toISOString().slice(0,10);
- for(const student of group){const daily=actual.filter(e=>e.studentId===student.id&&dates.get(e)===date);
- if(!daily.length&&day<5)records.push({date:dateLabel(date),track:className(student),grade:'بانتظار التقييم',score:'—',feedback:'لا يوجد تقييم محفوظ لهذا اليوم؛ لا تعني هذه الحالة غياب الطالب.'});
- for(const [index,e] of daily.entries()){const c=options.classes.find(c=>c.id===student.classId);const plan=options.plans?.find(p=>p.id===e.planEntryId&&p.classId===c?.remoteId)||options.plans?.find(p=>p.id===e.planEntryId&&!p.classId);records.push({date:index===0?dateLabel(date):'',track:className(student)+' • '+displayEvaluationTrack(e.track),grade:recitationStatusLabel(e.grade)||'بانتظار التقييم',score:numericEvaluationScore(e)??'—',feedback:isRecitationStatus(e)?recitationStatusLabel(e.grade):[achievementDescription(e)||plan?.text,options.includeNotes===false?'':e.writtenFeedback,options.includeNotes===false?'':readFlexibleNotes(e.notes).notes,options.includeNotes===false?'':e.nextStep,options.includeNotes===false?'':e.encouragement,isFollowed(e,options.followups||[])?'تمت متابعة الأسرة':'بانتظار متابعة الأسرة','آخر تحديث: '+riyadhDate(e.createdAt)].filter((v,i,items)=>v&&items.indexOf(v)===i).join('\n')})}
- }}
- const week=calendarFocus(options.termStartDate,bounds.from);const summary=['الفترة الأسبوعية: '+dateLabel(bounds.from)+' إلى '+dateLabel(bounds.to),week.holiday|| (week.inTerm?'الأسبوع الدراسي: '+week.week:week.phase),'إنجاز الطالب خلال الأسبوع:',...Array.from(new Set(actual.map(e=>dates.get(e)))).flatMap(date=>[dateLabel(date),...actual.filter(e=>dates.get(e)===date).map(e=>'• '+displayEvaluationTrack(e.track)+' • '+(achievementDescription(e)||options.plans?.find(p=>p.id===e.planEntryId)?.text||'تقييم المقرر المدرسي')+(isRecitationStatus(e)?'':' • مستوى الإتقان: '+e.grade))]),actual.length?'':'لم يُسجل إنجاز خلال هذه الفترة.','عدد التقييمات المحفوظة: '+actual.length,'متوسط الدرجات المحفوظة: '+average,'نتائج تابعتها الأسرة: '+actual.filter(e=>isFollowed(e,options.followups||[])).length,'الأيام دون تقييم تظهر دون احتسابها صفرًا.'].join('\n');
- const base=reportFileName(first.name)+' - التقييم الأسبوعي '+bounds.from;let name=base+'.html',counter=2;while(usedNames.has(name.toLocaleLowerCase())){name=base+' ('+counter+').html';counter++}usedNames.add(name.toLocaleLowerCase());
- const messageText=['التقييم الأسبوعي للقرآن الكريم','الطالب: '+first.name,'الفترة: '+bounds.from+' — '+bounds.to,'متوسط الدرجات المحفوظة: '+average,'عدد التقييمات: '+actual.length,'',...Array.from(new Set(actual.map(e=>dates.get(e)))).flatMap(date=>[date,...actual.filter(e=>dates.get(e)===date).map(e=>{const s=group.find(s=>s.id===e.studentId);return '• '+className(s)+' • '+displayEvaluationTrack(e.track)+' • '+(recitationStatusLabel(e.grade)||'بانتظار التقييم')+(numericEvaluationScore(e)!==null?' ('+numericEvaluationScore(e)+'/5)':'')+(achievementDescription(e)?'\n'+achievementDescription(e):'')+(options.includeNotes===false||isRecitationStatus(e)?'':'\n'+String(e.writtenFeedback||readFlexibleNotes(e.notes).notes||'').slice(0,100))})]),actual.length?'':'لا يوجد تقييم محفوظ لهذا الأسبوع حتى الآن.','الأيام غير المقيّمة لا تُحتسب صفرًا.','التقرير الكامل مرفق بهذه الرسالة؛ اضغط «فتح التقرير الأسبوعي الكامل» للاطلاع والطباعة.'].filter(Boolean).join('\n');
- return {name,studentName:first.name,studentIds:group.map(s=>s.id),messageText:messageText.length>3900?messageText.slice(0,3700)+'\nاضغط «فتح التقرير الأسبوعي الكامل» أسفل الرسالة للاطلاع على التفاصيل.':messageText,content:studentReportDocument({name:first.name,number:'',className:group.map(className).join(' / ')},options.school,options.logo,{title:'التقييم الأسبوعي للقرآن الكريم',summary,recommendation:'',teacher:options.teacher,showNumber:false,progress:studentProgressReports(evaluations,{studentIds:group.map(s=>s.id),until:bounds.to,termStartDate:options.termStartDate,enrollmentLabels:Object.fromEntries(group.map(s=>[s.id,className(s)]))}),records})};
+  const first=group[0],ids=new Set(group.map(s=>s.id));
+  const className=s=>{const c=options.classes.find(c=>c.id===s.classId);const name=c?.name||'الشعبة';return /الدبلوم[اة]|ثنائي/.test(name)?name:(s.program==='diploma'?'الدبلوما':'ثنائي اللغة')+' • '+name};
+  const actual=reportEvaluations(evaluations,options.termStartDate).filter(e=>ids.has(e.studentId)&&dates.get(e)>=bounds.from&&dates.get(e)<=bounds.to).sort((a,b)=>dates.get(a).localeCompare(dates.get(b))||a.track.localeCompare(b.track,'ar'));
+  const records=actual.map(e=>{
+   const s=group.find(s=>s.id===e.studentId),c=options.classes.find(c=>c.id===s.classId);
+   const plan=options.plans?.find(p=>p.id===e.planEntryId&&p.classId===c?.remoteId)||options.plans?.find(p=>p.id===e.planEntryId&&!p.classId);
+   return studentReportRecord(e,{date:dates.get(e),plan,includeNotes:options.includeNotes!==false,enrollment:group.length>1?className(s):''});
+  });
+  const week=calendarFocus(options.termStartDate,bounds.from);
+  const base=reportFileName(first.name)+' - التقييم الأسبوعي '+bounds.from;let name=base+'.html',counter=2;
+  while(usedNames.has(name.toLocaleLowerCase())){name=base+' ('+counter+').html';counter++}usedNames.add(name.toLocaleLowerCase());
+  const title='التقرير الأسبوعي لتسميع القرآن الكريم';
+  const messageText=[title,'الطالب: '+first.name,'الفترة: '+bounds.from+' — '+bounds.to,...records.map(r=>[r.date,r.enrollment,r.track,r.grade,r.assignment].filter(Boolean).join(' • ')),records.length?'':'لا يوجد تقييم محفوظ لهذا الأسبوع.','اضغط «فتح التقرير الأسبوعي الكامل» للاطلاع على التقرير.'].filter(Boolean).join('\n');
+  return {name,studentName:first.name,studentIds:group.map(s=>s.id),messageText:messageText.length>3900?messageText.slice(0,3700)+'\nالتفاصيل في التقرير الأسبوعي المرفق.':messageText,content:studentReportDocument({name:first.name,number:'',className:group.map(className).join(' / ')},options.school,options.logo,{title,summary:'',recommendation:'',teacher:options.teacher,showNumber:false,fromDate:bounds.from,toDate:bounds.to,weekLabel:week.inTerm?'الأسبوع '+week.week:week.phase,records})};
  });
 }
-
-
-

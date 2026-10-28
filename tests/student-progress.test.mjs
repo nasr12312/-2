@@ -36,13 +36,14 @@ test('surah percentages do not round an incomplete large surah to 100 and metada
 test('activity filters include everyone by default and distinguish recent, old and missing recitation without changing cumulative achievements',()=>{
  const p=studentProgress([first],{studentId:1,termStartDate:'2026-08-23'}),none=studentProgress([],{studentId:1});assert.equal(matchesProgressActivity(p,'all','2026-08-24'),true);assert.equal(matchesProgressActivity(none,'all','2026-08-24'),true);assert.equal(matchesProgressActivity(p,'recent','2026-08-30'),true);assert.equal(matchesProgressActivity(p,'stale','2026-08-31'),true);assert.equal(matchesProgressActivity(none,'stale','2026-08-31'),false);assert.equal(matchesProgressActivity(none,'missing','2026-08-31'),true);
 });
-test('individual and weekly reports include incomplete surahs and transition history without exposing another child, and PDF progress blocks stay flat',()=>{
+test('detailed progress remains available separately while family reports omit cumulative history',()=>{
  const entries=[first,next,make('other',0,[row(67,1,30)],{studentId:2})],groups=studentProgressReports(entries,{studentIds:[1],until:'2026-08-24',termStartDate:'2026-08-23'}),markup=progressReportMarkup(groups);
  assert.match(markup,/المنافقون/);assert.match(markup,/7–11/);assert.match(markup,/الجمعة/);assert.ok(!markup.includes('الملك'));assert.ok(!markup.includes('<section'));assert.ok(markup.includes('class="progress-surah-report"'));
- const report=studentReportDocument({name:'طالب',number:'secret',className:'أ'},'غراس','',{title:'تقرير',summary:'',recommendation:'',teacher:'المعلم',showNumber:false,progress:groups,records:[]});assert.ok(!report.includes('secret'));assert.match(report,/تسلسل إنجاز السور والآيات/);
- const weekly=weeklyStudentReports([{id:1,name:'طالب',academicId:'1000000000',classId:1}],entries,{date:'2026-08-24',termStartDate:'2026-08-23',school:'غراس',logo:'',teacher:'المعلم',classes:[{id:1,name:'أ'}]})[0];assert.match(weekly.content,/7–11/);assert.ok(!weekly.content.includes('الملك'));
+ const report=studentReportDocument({name:'طالب',number:'secret',className:'أ'},'غراس','',{title:'تقرير',summary:'',recommendation:'',teacher:'المعلم',showNumber:false,progress:groups,records:[]});assert.ok(!report.includes('secret'));assert.ok(!report.includes('تسلسل إنجاز السور والآيات'));
+ const weekly=weeklyStudentReports([{id:1,name:'طالب',academicId:'1000000000',classId:1}],entries,{date:'2026-08-24',termStartDate:'2026-08-23',school:'غراس',logo:'',teacher:'المعلم',classes:[{id:1,name:'أ'}]})[0];assert.ok(!weekly.content.includes('7–11'));assert.ok(weekly.content.includes('المنافقون'));assert.ok(weekly.content.includes('الجمعة'));assert.ok(!weekly.content.includes('الملك'));
  const escaped=progressReportMarkup(groups.map(g=>({...g,label:'<script>private</script>'})));assert.ok(!escaped.includes('<script>'));assert.ok(escaped.includes('&lt;script&gt;'));
 });
 test('CSV exports the filtered progress only and neutralizes spreadsheet formulas',()=>{
  const progress=studentProgress([first],{studentId:1,termStartDate:'2026-08-23'}),csv=studentProgressCsv([{student:{name:'=BAD()',id:1},className:'أ',progress}]);assert.ok(csv.includes("'=BAD()"));assert.match(csv,/المنافقون/);assert.match(csv,/7–11/);assert.equal(csv.split('\r\n').length,2);
 });
+
