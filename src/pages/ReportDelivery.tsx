@@ -45,7 +45,7 @@ export default function ReportDelivery(){
     const d=await supabase!.from('student_report_drafts').select('title,summary,recommendation,academic_notes,behavioral_notes').eq('student_id',id).eq('teacher_id',user!.id).maybeSingle();if(d.error)throw d.error;
     const draft=d.data;
     const records=Object.values(db.evaluations).filter(e=>e.studentId===student.id).sort((a,b)=>evaluationDate(b,db.settings.termStartDate).localeCompare(evaluationDate(a,db.settings.termStartDate))||b.createdAt.localeCompare(a.createdAt)).map(e=>studentReportRecord(e,{date:evaluationDate(e,db.settings.termStartDate),plan:db.schoolPlans?.find(p=>p.id===e.planEntryId)}));
-    const title=draft?.title?.trim()||'التقرير الأسبوعي لتسميع القرآن الكريم';
+    const title=draft?.title?.trim()||'تقرير متابعة الطالب';
     const html=studentReportDocument({name,number:student.academicId,program:student.program||'',className:db.classes.find(c=>c.id===student.classId)?.name||''},db.settings.school,db.settings.logo,{title,summary:draft?.summary||'',recommendation:draft?.recommendation||'',academicNotes:draft?.academic_notes||'',behavioralNotes:draft?.behavioral_notes||'',teacher:user!.name,showNumber:false,periodLabel:'كل السجل • كل المسارات',records});
     reportHtml=html;const result=await supabase!.from('shared_student_reports').insert({student_id:id,teacher_id:user!.id,title,html}).select('id,student_id,title,created_at').single();if(result.error||!result.data)throw result.error||Error();report=result.data;setReports(v=>({...v,[id]:report}));
    }
