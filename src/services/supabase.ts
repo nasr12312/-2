@@ -12,6 +12,9 @@ import {createClient} from '@supabase/supabase-js';
 import {seed} from '../data/seed';
 import type {Database,Role,User} from '../types';
 
+type RemotePlanRow={id:string;program_id:string;stage:string;grade:string;week_label:string;day_name:string;assignment_type:string;assignment_text:string};
+type RemoteEvaluationRow={id:string;client_key:string|null;student_id:string;grade:string;score:number|null;scores:unknown;notes:string|null;teacher_id:string;evaluated_at:string;plan_entry_id?:string;written_feedback?:string;encouragement?:string;next_step?:string;teacher_name?:string};
+
 const url=import.meta.env.VITE_SUPABASE_URL as string|undefined;
 const key=import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY as string|undefined;
 export const remoteEnabled=Boolean(url&&key&&!url.includes('YOUR_PROJECT'));
@@ -41,10 +44,10 @@ export async function loadRemoteDatabase():Promise<{db:Database;userId:string;se
   supabase.from('classes').select('id,name,program_id,stage,grade,section').eq('active',true).order('program_id').order('stage').order('grade').order('section'),
   supabase.from('teacher_class_assignments').select('teacher_id,class_id'),
   supabase.from('students').select('id,full_name,national_id,program_id,class_id,account_status,active').eq('active',true).order('full_name'),
-  readAllPages(()=>supabase.rpc('visible_evaluations').order('id')),
+  readAllPages<RemoteEvaluationRow>(()=>supabase.rpc('visible_evaluations').order('id')),
   supabase.from('recitation_submissions').select('id,student_id,status,submitted_at,submitted_by,grade,teacher_notes,evaluated_at,evaluated_by,storage_path,media_type,plan_entry_id,assignment,file_name,mime_type,file_size'),
   supabase.from('notifications').select('id,student_id,title,body,page,read_at,created_at').order('created_at',{ascending:false}),
-  readAllPages(()=>supabase.rpc('my_quran_plan').order('id')),supabase.from('platform_settings').select('school,term,year,term_start_date').eq('id',true).single(),supabase.from('platform_presentation').select('*').eq('id',true).single(),readClassPlans(),
+  readAllPages<RemotePlanRow>(()=>supabase.rpc('my_quran_plan').order('id')),supabase.from('platform_settings').select('school,term,year,term_start_date').eq('id',true).single(),supabase.from('platform_presentation').select('*').eq('id',true).single(),readClassPlans(),
  ]);
  if(profileResult.error)throw profileResult.error;
  for(const result of [classesResult,assignmentsResult,studentsResult,evaluationsResult,recitationsResult,notificationsResult,plansResult,settingsResult])if(result.error)throw result.error;
