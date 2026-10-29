@@ -1,7 +1,9 @@
+import {evaluationTrack} from './evaluation-slot.mjs';
 export const recitationStatuses=['لم يسمّع','لا يوجد تسميع اليوم','غائب اليوم'];
 export function isRecitationStatus(e){return recitationStatuses.includes(e?.grade)}
 export function recitationStatusLabel(grade){return grade==='غائب اليوم'?'غائب':grade==='لا يوجد تسميع اليوم'?'لا تسميع اليوم':grade||''}
-export function recitationStatusTargets(students,evaluations,{week,day,track,status,bulk=false}){const seen=new Set();return students.filter(s=>{if(!s.remoteId||seen.has(s.remoteId))return false;seen.add(s.remoteId);const rows=evaluations.filter(e=>e.studentId===s.id&&e.weekId===week&&e.day===day);return !rows.some(e=>e.track===track+' · حالة يومية'&&e.grade===status)&&(!bulk||!rows.some(e=>!isRecitationStatus(e)&&(e.track===track||e.track.startsWith(track+' · إنجاز فردي '))))})}
+export function recitationStatusTargets(students,evaluations,{week,day,track,status,bulk=false}){const seen=new Set();return students.filter(s=>{if(!s.remoteId||seen.has(s.remoteId))return false;seen.add(s.remoteId);const rows=evaluations.filter(e=>e.studentId===s.id&&e.weekId===week&&e.day===day&&evaluationTrack(e.track)===evaluationTrack(track));return !rows.some(e=>e.grade===status)&&(!bulk||rows.length===0)})}
+
 export function numericEvaluationScore(e){const n=e?.scores?.[0];return !isRecitationStatus(e)&&Number.isFinite(n)&&n>=1&&n<=5?n:null}
 export function conciseAssignment(text=''){return text.replace(/سورة (.+?) • وصل إلى الآية (\d+) \(من بداية السورة\)(?: • أتم السورة كاملة)?/g,(_,name,ayah)=>name+' حتى الآية '+ayah)}
 export function conciseCheckpoint(text=''){return text.startsWith('مراجعة وتثبيت عند الموضع')?'مراجعة وتثبيت.':text.startsWith('مراجعة عند موضع')?'مراجعة مقطع سابق.':text.startsWith('موضع مسجل حتى الآية')?'الموضع الحالي للطالب.':text.replace('الجديد في هذه المتابعة: من الآية ','الجديد: الآيات ').replace(' إلى الآية ','–')}
