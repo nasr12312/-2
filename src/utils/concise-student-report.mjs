@@ -17,11 +17,11 @@ export function conciseStudentReport(student,school,logo,draft){
  let lastDate='';
  for(const record of records){const date=record.date||lastDate;lastDate=date;if(!days.has(date))days.set(date,[]);days.get(date).push(record)}
  const dailyRows=[...days].sort(([a],[b])=>a.localeCompare(b)).flatMap(([date,rows])=>{
-  if(!rows.length)return ['<tr>'+[dayLabel(date),'—','لم يُسجّل تسميع','—'].map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>'];
+  if(!rows.length)return ['<tr>'+[dayLabel(date),'—','لا يوجد تقييم محفوظ لهذا اليوم','—'].map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>'];
   return rows.map((r,index)=>{
    const track=[r.enrollment,baseTrack(r)].filter(Boolean).join(' • ');
-   const required=r.required||'غير مسجّل';
-   const reached=r.status?'—':r.reached??r.assignment??'غير مسجّل';
+   const required=r.status?'—':r.required||'لم يُحدد المقرر المطلوب';
+   const reached=r.status?'—':r.reached||'تقييم محفوظ؛ لم يُحدد موضع الوصول';
    const note=r.simpleNote??unique([r.grade,r.notes??r.feedback,r.nextStep]);
    const values=[index===0?dayLabel(date):'',(track?track+': ':'')+required,reached,note];
    return '<tr>'+values.map(value=>'<td>'+escape(value||'—')+'</td>').join('')+'</tr>';
