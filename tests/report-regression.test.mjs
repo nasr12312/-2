@@ -29,7 +29,7 @@ test('saved assessment is shown without claiming an unrecorded reached verse or 
  assert.match(html,/سورة النبأ 1–10/);assert.match(html,/تقييم محفوظ؛ لم يُحدد موضع الوصول/);assert.match(html,/جيد/);assert.doesNotMatch(html,/غير مسجّل|لم يُسجّل تسميع/);
  const absent=studentReportRecord({...evaluation,grade:'غائب اليوم'},{date:'2026-10-27',plan});
  const absentHtml=studentReportDocument(student,'غراس','',{title:'تقرير',teacher:'معلم',records:[absent]});
- assert.match(absentHtml,/غائب/);assert.doesNotMatch(absentHtml,/تقييم محفوظ|سورة النبأ/);
+ assert.match(absentHtml,/غائب/);assert.doesNotMatch(absentHtml,/تقييم محفوظ/);assert.match(absentHtml,/سورة النبأ 1–10/);
 });
 test('weekly report keeps lesson date rather than later save date and includes the matched required lesson',()=>{
  const file=weeklyStudentReports([student],[evaluation],{date:'2026-10-29',termStartDate:'2026-08-23',classes:[classroom],plans:[plan],school:'غراس',logo:'',teacher:'معلم'})[0];
