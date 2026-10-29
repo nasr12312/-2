@@ -19,9 +19,9 @@ test('parent wording is concise without changing stored checkpoint semantics',()
  assert.equal(conciseAssignment('سورة النازعات • وصل إلى الآية 24 (من بداية السورة)'),'النازعات حتى الآية 24');
  assert.equal(conciseCheckpoint('مراجعة وتثبيت عند الموضع نفسه؛ لا يُحتسب تقدم جديد.'),'مراجعة وتثبيت.');
 });
-test('today recitation is a frozen achievement and absence never includes a plan or old guidance',()=>{
+test('absence retains its required plan and teacher note without showing old reached work or next step',()=>{
  const notes=flexibleNotes('today','الإخلاص: الآيات 1–4','أحسنت');assert.equal(readFlexibleNotes(notes).mode,'today');assert.equal(achievementDescription({notes}),'الإخلاص: الآيات 1–4');
  const [report]=weeklyStudentReports([{id:1,name:'طالب',academicId:'1000000000',classId:1}],[{studentId:1,weekId:7,day:4,track:'الحفظ · حالة يومية',grade:'غائب اليوم',scores:[],notes:'ملاحظة قديمة لا تعرض',nextStep:'توجيه قديم لا يعرض',planEntryId:'p',createdAt:'2026-10-08T08:00:00Z'}],{date:'2026-10-08',termStartDate:'2026-08-23',classes:[{id:1,name:'أ'}],plans:[{id:'p',text:'خطة لا تعرض'}],school:'غراس',logo:'',teacher:'المعلم'});
- for(const text of ['ملاحظة قديمة لا تعرض','توجيه قديم لا يعرض','خطة لا تعرض'])assert.ok(!report.content.includes(text),text);assert.ok(report.content.includes('غائب'));
+ assert.ok(report.content.includes('خطة لا تعرض'));assert.ok(report.content.includes('ملاحظة قديمة لا تعرض'));assert.ok(!report.content.includes('توجيه قديم لا يعرض'));assert.ok(report.content.includes('غائب'));
 });
 

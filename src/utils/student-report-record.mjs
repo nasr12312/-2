@@ -20,9 +20,9 @@ export function studentReportRecord(e,{date,plan,includeNotes=true,enrollment=''
  const assignment=status?'':achievementDescription(e)||flexible.assignment||plan?.text||'';
  const actual=readAchievement(e.notes),position=actual?.position,surah=position&&quranSurahs.find(s=>s.id===position.surahId);
  const reached=status?'':[conciseAssignment(flexible.assignment),actual?.kind!=='checkpoint'&&surah&&position.ayah<=surah.ayahs?'وصل إلى الآية '+position.ayah+' من سورة '+surah.name:''].filter(Boolean).join('\n');
- const required=status?'':plan?.text||'';
- const notes=status||!includeNotes?'':[e.writtenFeedback,flexible.notes].filter((value,i,items)=>value&&value!==assignment&&items.indexOf(value)===i).join('\n');
- const simpleNote=status?recitationStatusLabel(e.grade):[recitationStatusLabel(e.grade),['late','multi_late'].includes(flexible.mode)?'ملاحظة: الطالب '+progressLabels[flexible.mode]:'',includeNotes?flexible.notes:'',includeNotes&&e.writtenFeedback!==actual?.summary&&e.writtenFeedback!==assignment&&!e.writtenFeedback?.startsWith('مستوى الإتقان: ')?e.writtenFeedback:'',includeNotes?e.nextStep:''].filter((value,i,items)=>value&&items.indexOf(value)===i).join('\n');
+ const required=plan?.text||'';
+ const notes=!includeNotes?'':status?flexible.notes:[e.writtenFeedback,flexible.notes].filter((value,i,items)=>value&&value!==assignment&&items.indexOf(value)===i).join('\n');
+ const simpleNote=status?[recitationStatusLabel(e.grade),notes].filter((value,i,items)=>value&&items.indexOf(value)===i).join('\n'):[recitationStatusLabel(e.grade),['late','multi_late'].includes(flexible.mode)?'ملاحظة: الطالب '+progressLabels[flexible.mode]:'',includeNotes?flexible.notes:'',includeNotes&&e.writtenFeedback!==actual?.summary&&e.writtenFeedback!==assignment&&!e.writtenFeedback?.startsWith('مستوى الإتقان: ')?e.writtenFeedback:'',includeNotes?e.nextStep:''].filter((value,i,items)=>value&&items.indexOf(value)===i).join('\n');
  return {required,reached,simpleNote,date,track:displayEvaluationTrack(e.track),enrollment,grade:recitationStatusLabel(e.grade),score:numericEvaluationScore(e)??'—',assignment,notes,nextStep:status||!includeNotes?'':e.nextStep||'',status,feedback:[assignment,notes,includeNotes&&!status?e.nextStep:''].filter(Boolean).join('\n')};
 }
 

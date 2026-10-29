@@ -6,7 +6,10 @@ const dayLabel=date=>/^\d{4}-\d{2}-\d{2}$/.test(date)?new Intl.DateTimeFormat('a
 // Keep each lesson once, with its assignment separate from the teacher's notes.
 export function conciseStudentReport(student,school,logo,draft){
  const safeLogo=/^(https:\/\/|data:image\/jpeg;base64,)/.test(logo)?logo:'https://gherasquran.com/gheras-logo.png';
- const records=draft.records||[],days=new Map();
+ const records=[...(draft.records||[])],days=new Map();
+ const lessonKey=row=>[row.date,baseTrack(row),row.enrollment||''].join('|');
+ const assessed=new Set(records.map(lessonKey));
+ for(const row of draft.plannedRows||[])if(!assessed.has(lessonKey(row))){records.push({...row,missing:true,simpleNote:'لا يوجد تقييم محفوظ لهذا اليوم'});assessed.add(lessonKey(row));}
  if(draft.fromDate&&draft.toDate){
   const start=new Date(draft.fromDate+'T12:00:00Z'),end=new Date(draft.toDate+'T12:00:00Z');
   // Blank school days are useful in a weekly form, without implying absence.
@@ -17,14 +20,14 @@ export function conciseStudentReport(student,school,logo,draft){
  let lastDate='';
  for(const record of records){const date=record.date||lastDate;lastDate=date;if(!days.has(date))days.set(date,[]);days.get(date).push(record)}
  const dailyRows=[...days].sort(([a],[b])=>a.localeCompare(b)).flatMap(([date,rows])=>{
-  if(!rows.length)return ['<tr>'+[dayLabel(date),'—','لا يوجد تقييم محفوظ لهذا اليوم','—'].map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>'];
+  if(!rows.length)return ['<tr>'+[dayLabel(date),'لم يُحدد مقرر لهذا اليوم','','لا يوجد تقييم محفوظ لهذا اليوم'].map(value=>'<td>'+escape(value)+'</td>').join('')+'</tr>'];
   return rows.map((r,index)=>{
    const track=[r.enrollment,baseTrack(r)].filter(Boolean).join(' • ');
-   const required=r.status?'—':r.required||'لم يُحدد المقرر المطلوب';
-   const reached=r.status?'—':r.reached||'تقييم محفوظ؛ لم يُحدد موضع الوصول';
-   const note=r.simpleNote??unique([r.grade,r.notes??r.feedback,r.nextStep]);
+   const required=r.required||'لم يُحدد المقرر المطلوب';
+   const reached=r.status||r.missing?'':r.reached||'تقييم محفوظ؛ لم يُحدد موضع الوصول';
+   const note=r.simpleNote||unique([r.grade,r.notes??r.feedback,r.nextStep])||'لا توجد ملاحظة إضافية';
    const values=[index===0?dayLabel(date):'',(track?track+': ':'')+required,reached,note];
-   return '<tr>'+values.map(value=>'<td>'+escape(value||'—')+'</td>').join('')+'</tr>';
+   return '<tr>'+values.map(value=>'<td>'+escape(value??'')+'</td>').join('')+'</tr>';
   });
  }).join('');
  const note=unique([draft.summary,draft.academicNotes,draft.recommendation]);

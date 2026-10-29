@@ -1,3 +1,4 @@
+import {reportPlannedLessons} from './report-planned-lessons.mjs';
 import {studentReportRecords} from './student-report-record.mjs';
 import {studentReportDocument} from './student-export.mjs';
 import {reportPeriod} from './report-period.mjs';
@@ -11,8 +12,10 @@ export function currentStudentReport(db,studentId,draft={},options={}){
  const bounds=period==='range'?{from:options.from,to:options.to}:reportPeriod(date,period);
  if(period!=='all'&&(!bounds.from||!bounds.to||bounds.from>bounds.to))throw Error('راجع فترة التقرير.');
  const records=studentReportRecords(Object.values(db.evaluations),{studentId:student.id,classroom,plans:db.schoolPlans,termStartDate:db.settings.termStartDate,from:period==='all'?undefined:bounds.from,to:period==='all'?undefined:bounds.to,track:options.track||''});
+ const tracks=options.track?[options.track]:[...new Set(records.map(r=>r.track.split(' • ')[0]))];
+ const plannedRows=period==='all'?[]:reportPlannedLessons(db.schoolPlans,classroom,{...bounds,termStartDate:db.settings.termStartDate,tracks:tracks.length?tracks:['الحفظ']});
  const title=draft.title?.trim()||'التقرير الأسبوعي لتسميع القرآن الكريم';
- const html=studentReportDocument({name:student.name,number:'',program:student.program||'',className:classroom?.name||''},db.settings.school,db.settings.logo,{...draft,title,summary:draft.summary||'',recommendation:draft.recommendation||'',teacher:options.teacher||'',showNumber:false,periodLabel:(period==='all'?'كل السجل':bounds.from+' — '+bounds.to)+(options.track?' • '+options.track:' • كل المسارات'),fromDate:period==='all'?undefined:bounds.from,toDate:period==='all'?undefined:bounds.to,weekLabel:period==='week'?'الأسبوع '+calendarFocus(db.settings.termStartDate,date).week:undefined,records});
+ const html=studentReportDocument({name:student.name,number:'',program:student.program||'',className:classroom?.name||''},db.settings.school,db.settings.logo,{...draft,title,summary:draft.summary||'',recommendation:draft.recommendation||'',teacher:options.teacher||'',showNumber:false,periodLabel:(period==='all'?'كل السجل':bounds.from+' — '+bounds.to)+(options.track?' • '+options.track:' • كل المسارات'),fromDate:period==='all'?undefined:bounds.from,toDate:period==='all'?undefined:bounds.to,weekLabel:period==='week'?'الأسبوع '+calendarFocus(db.settings.termStartDate,date).week:undefined,plannedRows,records});
  return {html,records,student,title};
 }
 
