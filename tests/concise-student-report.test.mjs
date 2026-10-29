@@ -12,7 +12,7 @@ test('weekly form uses five school days, saved course and notes without statisti
  for(const text of ['private-number','must not appear','سلوك لا يخص التقرير','آخر متابعة','متوسط الدرجات','عدد التقييمات','آخر تحديث','تطبيق أحكام التجويد','10 دقائق'])assert.ok(!html.includes(text),text);
  const table=html.split('<table class="recitation-log simple-recitation-log">')[1].split('</table>')[0];
  assert.equal((table.match(/<tbody><tr>|<\/tr><tr>/g)||[]).length,5);
- assert.equal((table.match(/لم يُسجّل تسميع/g)||[]).length,4);
+ assert.equal((table.match(/لا يوجد تقييم محفوظ لهذا اليوم/g)||[]).length,4);
  assert.ok(!table.includes('غائب'));
 });
 test('several tracks on one day keep their own assignment, grade and note in the same row',()=>{

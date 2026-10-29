@@ -21,7 +21,7 @@ export function weeklyStudentReports(students,evaluations,options){
   const base=reportFileName(first.name)+' - التقييم الأسبوعي '+bounds.from;let name=base+'.html',counter=2;
   while(usedNames.has(name.toLocaleLowerCase())){name=base+' ('+counter+').html';counter++}usedNames.add(name.toLocaleLowerCase());
   const title='التقرير الأسبوعي لتسميع القرآن الكريم';
-  const messageText=[title,'الطالب: '+first.name,'الفترة: '+bounds.from+' — '+bounds.to,...records.map(r=>[r.date,r.enrollment,r.track,'المطلوب: '+(r.required||'غير مسجّل'),'وصل: '+(r.reached||'غير مسجّل'),r.simpleNote].filter(Boolean).join(' • ')),records.length?'':'لا يوجد تقييم محفوظ لهذا الأسبوع.','اضغط «فتح التقرير الأسبوعي الكامل» للاطلاع على التقرير.'].filter(Boolean).join('\n');
+  const messageText=[title,'الطالب: '+first.name,'الفترة: '+bounds.from+' — '+bounds.to,...records.map(r=>[r.date,r.enrollment,r.track,'المطلوب: '+(r.status?'—':r.required||'لم يُحدد المقرر المطلوب'),'وصل: '+(r.status?'—':r.reached||'تقييم محفوظ؛ لم يُحدد موضع الوصول'),r.simpleNote].filter(Boolean).join(' • ')),records.length?'':'لا يوجد تقييم محفوظ لهذا الأسبوع.','اضغط «فتح التقرير الأسبوعي الكامل» للاطلاع على التقرير.'].filter(Boolean).join('\n');
   return {name,studentName:first.name,studentIds:group.map(s=>s.id),messageText:messageText.length>3900?messageText.slice(0,3700)+'\nالتفاصيل في التقرير الأسبوعي المرفق.':messageText,content:studentReportDocument({name:first.name,number:'',className:group.map(className).join(' / ')},options.school,options.logo,{title,summary:'',recommendation:'',teacher:options.teacher,showNumber:false,fromDate:bounds.from,toDate:bounds.to,weekLabel:week.inTerm?'الأسبوع '+week.week:week.phase,records})};
  });
 }
